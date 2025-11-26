@@ -9,6 +9,9 @@ public class MainCode {
         //array de chars para guardar o texto
         char[] guardiaoTexto = new char[1024];
 
+        Atividade tempo;
+        String nomeJanela = "";
+
         while(true) {
             Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
             //descobre o nome de onde está
@@ -27,7 +30,7 @@ public class MainCode {
             int timeParadoMili = tempoLigado - info.dwTime;
 
             int timeParadoSegundos = timeParadoMili/1000;
-            if(timeParadoSegundos >= 60) {
+            if(timeParadoSegundos >= 5) {
                 System.out.println("Estás AFK há: " + timeParadoSegundos + "segundos.");
             } else {
                 System.out.println("A trabalhar em: " + Native.toString(guardiaoTexto));
