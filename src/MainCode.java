@@ -14,6 +14,8 @@ public class MainCode {
         Atividade atividade = null;
         String janelaAtual = "";
 
+        BDA.ligarEConfirmarBDA();
+        
         while(true) {
             Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
             //descobre o nome de onde está
