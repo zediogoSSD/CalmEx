@@ -4,8 +4,8 @@ import java.time.Duration;
 
 public class Atividade {
     public String janelaName;
-    LocalDateTime horaInicio;
-    LocalDateTime horaFim;
+    public LocalDateTime horaInicio;
+    public LocalDateTime horaFim;
 
     public Atividade(String janela) {
         this.janelaName = janela;
