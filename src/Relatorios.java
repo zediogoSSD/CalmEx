@@ -1,5 +1,4 @@
 package src;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,21 +16,22 @@ public class Relatorios {
             System.out.println("---RELATÓRIO DE HOJE---");
             
             while(rs.next()) {
-                String nome = rs.getString("NomeJanela");
+                String nomeCompleto = rs.getString("NomeJanela");
+                String nomeBonito = limparNome(nomeCompleto);
                 int tempo = rs.getInt("TempoTotal");
 
                 if(tempo < 60) {
-                    System.out.println(nome + ": " + tempo + " segundos.");
+                    System.out.println(nomeBonito + ": " + tempo + " segundos.");
                 } else {
                     int minutos = tempo / 60;
                     int segundosResto = tempo % 60;
                     if(minutos < 60) {
-                        System.out.println(nome + ": " + minutos + " minutos e " + segundosResto + " segundos.");
+                        System.out.println(nomeBonito + ": " + minutos + " minutos e " + segundosResto + " segundos.");
                     } else {
                         int horas = minutos / 60;
                         int minutosRestantes = minutos % 60;
 
-                        System.out.println(nome + ": " + horas + " horas " + minutosRestantes + " minutos e " + segundosResto + " segundos.");
+                        System.out.println(nomeBonito + ": " + horas + " horas " + minutosRestantes + " minutos e " + segundosResto + " segundos.");
                     }
                 }                
             }
@@ -39,6 +39,17 @@ public class Relatorios {
         } catch (Exception e) {
             System.out.println("Erro no relatório: " + e.getMessage());
         }
+    }
+
+    public static String limparNome(String tituloCompleto) {
+
+        int posicaoTraco = tituloCompleto.lastIndexOf(" - ");
+
+        if (posicaoTraco == -1 || tituloCompleto == null) {
+            return tituloCompleto;
+        }
+        
+        return tituloCompleto.substring(posicaoTraco + 3);
     }
 
     public static void fazerRelatorioSemanal() {

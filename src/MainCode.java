@@ -19,12 +19,19 @@ public class MainCode {
         // Define a memória inicial JÁ LIMPA
         String janelaAtual = limparTitulo(Native.toString(guardiaoTexto));
     
-        System.out.println("Programa Iniciado. Janela atual: " + janelaAtual);
+        System.out.println("Programa Iniciado.");
+        System.out.println("Janela atual: " + janelaAtual);
 
         //confirma e liga (se existir) uma BD
         BD.ligarEConfirmarBD();
         //fazer a limpezaMensal
         BD.limpezaMensal();
+        
+        //relatório diário quando o programa é desligado
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("A encerrar o Time Tracker...");
+            Relatorios.fazerRelatorioDiario();
+        }));
 
         while(true) {
             Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
@@ -72,9 +79,6 @@ public class MainCode {
 
             //serve só para ele esperar para mandar outro se não for recebido, para não matar o PC
             Thread.sleep(1000);
-
-            //relatório diário
-            Relatorios.fazerRelatorioDiario();
         }
     }
 
