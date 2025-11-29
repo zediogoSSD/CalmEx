@@ -14,8 +14,9 @@ public class MainCode {
         Atividade atividade = null;
         String janelaAtual = "";
 
-        BDA.ligarEConfirmarBDA();
-        
+        //confirma e liga (se existir) uma BD
+        BD.ligarEConfirmarBD();
+
         while(true) {
             Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
             //descobre o nome de onde está
@@ -35,20 +36,25 @@ public class MainCode {
 
             int timeParadoSegundos = timeParadoMili/1000;
             if(timeParadoSegundos >= 5) {
-                System.out.println("Estás AFK há: " + timeParadoSegundos + "segundos.");
+                System.out.println("Estás AFK há: " + timeParadoSegundos + " segundos.");
             } else {
                 System.out.println("A trabalhar em: " + Native.toString(guardiaoTexto));
             }
 
+            //Feedback de que janela/app estamos no momento e quando há mudança de janela
             String janelaAgora = Native.toString(guardiaoTexto);
             if(!janelaAgora.equals(janelaAtual)) {
-                System.out.println("Mudança de Janela Detetada");
+                System.out.println("---Mudança de Janela Detetada---");
 
                 if(atividade != null) {
+                    //fecha a atividade, ou seja, fecha a janela
                     atividade.horaFim = LocalDateTime.now();
-                    System.out.println("Esteve na app/página: " + atividade.janelaName + ", durante " + atividade.duracaoSegundos() + "segundos.");
+                    System.out.println("Esteve na app/página: " + atividade.janelaName + ", durante " + atividade.duracaoSegundos() + " segundos.");
+                    //salva a atividade na BD
+                    BD.salvarAtividade(atividade);
                 }
 
+                //Muda e começa a contar o tempo na nova janela (aka Atividade)
                 Atividade janelaAtualAtividade = new Atividade(janelaAgora);
                 atividade = janelaAtualAtividade;
 
