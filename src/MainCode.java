@@ -1,6 +1,5 @@
 package src;
 import java.time.LocalDateTime;
-
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -8,14 +7,24 @@ import com.sun.jna.Pointer;
 
 public class MainCode {
     public static void main(String[] args) throws InterruptedException {
+
         //array de chars para guardar o texto
         char[] guardiaoTexto = new char[1024];
-
         Atividade atividade = null;
-        String janelaAtual = "";
+        //aponta para a janela que está aberta, preciso disto aqui para não haver logo no inicio uma mudança de janela
+
+        Pointer ptrInicial = kbmInputs.INSTANCE.GetForegroundWindow();
+        kbmInputs.INSTANCE.GetWindowTextW(ptrInicial, guardiaoTexto, 1024);
+    
+        // Define a memória inicial JÁ LIMPA
+        String janelaAtual = limparTitulo(Native.toString(guardiaoTexto));
+    
+        System.out.println("Programa Iniciado. Janela atual: " + janelaAtual);
 
         //confirma e liga (se existir) uma BD
         BD.ligarEConfirmarBD();
+        //fazer a limpezaMensal
+        BD.limpezaMensal();
 
         while(true) {
             Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
@@ -42,7 +51,7 @@ public class MainCode {
             }
 
             //Feedback de que janela/app estamos no momento e quando há mudança de janela
-            String janelaAgora = Native.toString(guardiaoTexto);
+            String janelaAgora = limparTitulo(Native.toString(guardiaoTexto));
             if(!janelaAgora.equals(janelaAtual)) {
                 System.out.println("---Mudança de Janela Detetada---");
 
@@ -63,7 +72,21 @@ public class MainCode {
 
             //serve só para ele esperar para mandar outro se não for recebido, para não matar o PC
             Thread.sleep(1000);
+
+            //relatório diário
+            Relatorios.fazerRelatorioDiario();
         }
     }
 
+    //função para limpar o título (para não criar 2 tabelas iguais onde o nome muda uma virgula)
+    public static String limparTitulo(String tituloSujo) {
+        
+        if (tituloSujo == null || tituloSujo.isEmpty()) {
+            return "";
+        }
+
+        String apenasTextoNormal = tituloSujo.replaceAll("[^\\x20-\\x7E]", "");
+
+        return apenasTextoNormal.trim();
+    }
 }

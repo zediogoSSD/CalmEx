@@ -28,7 +28,7 @@ public class BD {
         String sql = "INSERT INTO atividades(NomeJanela, DataInicio, DataFim, Duracao) VALUES(?,?,?,?)";
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
         
             // 1. Nome da Janela
             pstmt.setString(1, ativ.janelaName);
@@ -49,4 +49,21 @@ public class BD {
             System.out.println("Erro ao salvar: " + e.getMessage());
         }
     }
+
+    public static void limpezaMensal() {
+    // Apaga tudo o que for mais velho que 28 dias
+    String sql = "DELETE FROM atividades WHERE date(DataInicio) < date('now', '-28 days')";
+
+    // O url tem de estar definido aqui (ou ser uma variável global da classe)
+    String url = "jdbc:sqlite:meu_tempo.db";
+
+    //o getConnection abre a porta para os outros poderem trabalhar, o statement é o trabalhador, execute é fazer o trabalho
+    try (Connection conn = DriverManager.getConnection(url);
+        Statement stmt = conn.createStatement()) {
+        stmt.executeUpdate(sql);
+
+    } catch (Exception e) {
+        System.out.println("Erro na limpeza: " + e.getMessage());
+    }
+}
 }
