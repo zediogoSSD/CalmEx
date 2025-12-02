@@ -27,7 +27,7 @@ public class Relatorios {
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()){
             
-            System.out.println("---RELATÓRIO DE HOJE---");
+            System.out.println("---RELATÓRIO SEMANAL---");
 
             Map<String, Integer> juntarTabsNumSó = new HashMap<>();
             
@@ -35,6 +35,10 @@ public class Relatorios {
                 String nomeCompleto = rs.getString("NomeJanela");
                 String nomeBonito = limparNome(nomeCompleto);
                 int tempo = rs.getInt("TempoTotal");
+
+                if(nomeBonito == null || nomeBonito.trim().isEmpty()) {
+                    continue;
+                }
 
                 if(juntarTabsNumSó.containsKey(nomeBonito)) {
                     int tempoAntigo = juntarTabsNumSó.get(nomeBonito);
@@ -71,34 +75,52 @@ public class Relatorios {
 
     public static void fazerRelatorioSemanal() {
         //sql que seleciona o nome da janela e soma toda a sua duração, só do próprio dia, e agrupa por nome e ordena por tempo
-        String sql = "SELECT NomeJanela, SUM(duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) >= date('now' '-7 days') " + "GROUP BY Nomejanela " + "ORDER BY TempoTotal DESC";
+        String sql = "SELECT NomeJanela, SUM(duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) >= date('now', '-7 days') " + "GROUP BY Nomejanela " + "ORDER BY TempoTotal DESC";
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()){
             
-            System.out.println("---RELATÓRIO DE HOJE---");
+            System.out.println("---RELATÓRIO SEMANAL---");
+
+            Map<String, Integer> juntarTabsNumSó = new HashMap<>();
             
             while(rs.next()) {
                 String nomeCompleto = rs.getString("NomeJanela");
                 String nomeBonito = limparNome(nomeCompleto);
                 int tempo = rs.getInt("TempoTotal");
 
-                if(tempo < 60) {
-                    System.out.println(nomeBonito + ": " + tempo + " segundos.");
+                if(nomeBonito == null || nomeBonito.trim().isEmpty()) {
+                    continue;
+                }
+
+                if(juntarTabsNumSó.containsKey(nomeBonito)) {
+                    int tempoAntigo = juntarTabsNumSó.get(nomeBonito);
+                    juntarTabsNumSó.put(nomeBonito, tempoAntigo + tempo);
                 } else {
-                    int minutos = tempo / 60;
-                    int segundosResto = tempo % 60;
-                    if(minutos < 60) {
-                        System.out.println(nomeBonito + ": " + minutos + " minutos e " + segundosResto + " segundos.");
+                    juntarTabsNumSó.put(nomeBonito, tempo);
+                }             
+            }
+
+            for (String nomeApp : juntarTabsNumSó.keySet()) {
+                int tempoFinal = juntarTabsNumSó.get(nomeApp);
+
+                if (tempoFinal < 60) {
+                    System.out.println(nomeApp + ": " + tempoFinal + " segundos.");
+                } else {
+                    int minutos = tempoFinal / 60;
+                    int segundosResto = tempoFinal % 60;
+
+                    if (minutos < 60) {
+                        System.out.println(nomeApp + ": " + minutos + " minutos e " + segundosResto + " segundos.");
                     } else {
                         int horas = minutos / 60;
                         int minutosRestantes = minutos % 60;
-
-                        System.out.println(nomeBonito + ": " + horas + " horas " + minutosRestantes + " minutos e " + segundosResto + " segundos.");
+                        
+                        System.out.println(nomeApp + ": " + horas + " horas, " + minutosRestantes + " minutos e " + segundosResto + " segundos.");
                     }
-                }                
-            }
+                }
+        }
 
         } catch (Exception e) {
             System.out.println("Erro no relatório: " + e.getMessage());

@@ -30,6 +30,7 @@ public class MainCode {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("A encerrar o Time Tracker...");
             Relatorios.fazerRelatorioDiario();
+            Relatorios.fazerRelatorioSemanal();
         }));
 
         while(true) {
