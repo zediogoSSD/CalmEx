@@ -27,7 +27,7 @@ public class Relatorios {
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()){
             
-            System.out.println("---RELATÓRIO SEMANAL---");
+            System.out.println("---RELATÓRIO DE HOJE---");
 
             Map<String, Integer> juntarTabsNumSó = new HashMap<>();
             
