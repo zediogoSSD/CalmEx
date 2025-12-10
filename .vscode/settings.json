@@ -1,6 +1,10 @@
 {
     "java.project.referencedLibraries": [
         "libs/jna-5.18.1.jar",
-        "libs/sqlite-jdbc-3.51.0.0.jar"
+        "libs/sqlite-jdbc-3.51.0.0.jar",
+        "libs/javafx.base.jar",      
+        "libs/javafx.controls.jar",  
+        "libs/javafx.fxml.jar",      
+        "libs/javafx.graphics.jar"   
     ]
 }
