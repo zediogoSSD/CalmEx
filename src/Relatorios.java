@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class Relatorios {
 
@@ -138,7 +139,7 @@ public class Relatorios {
          ResultSet rs = stmt.executeQuery()) {
 
         while (rs.next()) {
-            String dia = rs.getString("Dia"); // Vem como "2025-12-10"
+            String dia = rs.getString("Dia");
             int tempo = rs.getInt("TempoTotal");
             mapaTempo.put(dia, tempo);
         }
@@ -148,5 +149,30 @@ public class Relatorios {
         }
 
         return mapaTempo;
+    }
+
+    public static Map<String, Integer> getAppsMaisUsadasPorDia() {
+        int limiteAFK = 3600; // 1 hora de limite para não contar AFK
+    
+        String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) = date('now') " + "AND Duracao < " + limiteAFK + " " + "GROUP BY NomeJanela " + "ORDER BY TempoTotal DESC " + "LIMIT 15";
+
+        //Usamos LinkedHashMap para ter ordem
+        Map<String, Integer> topApps = new LinkedHashMap<>();
+
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
+
+        while (rs.next()) {
+            String nome = rs.getString("NomeJanela");
+            int tempo = rs.getInt("TempoTotal");
+            topApps.put(nome, tempo);
+        }
+
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar Top Apps: " + e.getMessage());
+        }
+    
+        return topApps;
     }
 }

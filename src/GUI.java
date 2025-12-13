@@ -1,6 +1,9 @@
 package src;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import java.util.Locale;
@@ -135,13 +138,57 @@ public class GUI extends Application{
         //lista das apps
         ListView<String> listaApps = new ListView<>();
         //dados
-        listaApps.getItems().add("VS Code - 5h");
-        listaApps.getItems().add("Chrome - 3h");
+        Map<String, Integer> dadosBrutos = Relatorios.getAppsMaisUsadasPorDia();
+        Map<String, Integer> listaLimpa = new LinkedHashMap<>();
+
+        for(Map.Entry<String, Integer> umAum : dadosBrutos.entrySet()) {
+            String nomeApp = umAum.getKey();
+            int tempo = umAum.getValue();
+
+            if (nomeApp == null || nomeApp.trim().isEmpty()) {
+                continue; 
+            }
+
+            //serve só para aparecer o nome da app e não as tabs
+            String[] partes = nomeApp.split(" - ");
+            String nomeLimpo = partes[partes.length - 1].trim();
+
+            //nova lista para não haver duplicados (ele soma o tempo de todos os duplicados)
+            listaLimpa.put(nomeLimpo, listaLimpa.getOrDefault(nomeLimpo, 0) + tempo);
+        }
+
+        List<Map.Entry<String, Integer>> listaOrdenada = new ArrayList<>(listaLimpa.entrySet());
+
+        listaOrdenada.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+
+        for(Map.Entry<String, Integer> app : listaOrdenada) {
+            String nome = app.getKey();
+            int tempo = app.getValue();
+
+            String bonita;
+            if(tempo < 60) {
+               bonita = nome + " - " + tempo + "s";
+            } else {
+                int horas = tempo / 3600;
+                int restoDasHoras = tempo % 3600;
+                int minutosRestantes = restoDasHoras / 60;
+
+                if (horas > 0) {
+                    bonita = nome + " - " + horas + "h " + minutosRestantes + "m"; 
+                } else {
+                    bonita = nome + " - " + minutosRestantes + "m"; 
+                }
+            }
+
+            listaApps.getItems().add(bonita);
+        }
+        
 
         //lista na vertical
         VBox caixaVertical = new VBox(10); //10 é o espaço entre as apps
         caixaVertical.getChildren().addAll(tituloListaApps, listaApps);
         caixaVertical.getStyleClass().add("caixinhas");
+        caixaVertical.setFillWidth(true);
 
         //meter na grelha
         grelhaCima.add(caixaVertical, 1, 0);
