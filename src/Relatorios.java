@@ -27,7 +27,7 @@ public class Relatorios {
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()){
             
-            System.out.println("---RELATÓRIO DE HOJE---");
+            System.out.println("---RELATÓRIO HOJE---");
 
             Map<String, Integer> juntarTabsNumSó = new HashMap<>();
             
@@ -125,5 +125,28 @@ public class Relatorios {
         } catch (Exception e) {
             System.out.println("Erro no relatório: " + e.getMessage());
         }
+    }
+
+    public static Map<String, Integer> getTempoPorDia() {
+        int limiteAFK = 3600;
+        String sql = "SELECT date(DataInicio) as Dia, SUM(Duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) >= date('now', '-7 days') " + "AND Duracao < " + limiteAFK + " " + "GROUP BY date(DataInicio) " + "ORDER BY Dia ASC";
+        
+        Map<String, Integer> mapaTempo = new HashMap<>();
+
+        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+         PreparedStatement stmt = conn.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+
+        while (rs.next()) {
+            String dia = rs.getString("Dia"); // Vem como "2025-12-10"
+            int tempo = rs.getInt("TempoTotal");
+            mapaTempo.put(dia, tempo);
+        }
+
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar dias: " + e.getMessage());
+        }
+
+        return mapaTempo;
     }
 }
