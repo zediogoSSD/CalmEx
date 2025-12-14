@@ -11,9 +11,7 @@ import java.util.Locale;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Locale.Category;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -34,7 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class GUI extends Application{
-    public void start(Stage palco) {
+    public void start(Stage TimeTracker) {
 
         //novo layout, vamos fazer duas grelhas, uma de cima, com o gráfico de barras e a lista e uma de baixo, com botoes e objetivo
         VBox layoutPrincipal = new VBox(20); //espaço entre andares
@@ -201,9 +199,19 @@ public class GUI extends Application{
         graficoObjetivo.setTitle("Objetivo Diário");
 
         //criar fatias
-        PieChart.Data fatiaFeita = new PieChart.Data("Trabalhado", 70);
-        PieChart.Data fatiaFalta = new PieChart.Data("Falta", 30);
+        int objetivoHoras = 5;
+        int objetivoSegundos = objetivoHoras * 3600;
 
+        String chave = LocalDate.now().toString();
+
+        int segundosFeitos = Relatorios.getTempoPorDia().getOrDefault(chave, 0);
+
+        int segundosFalta = objetivoSegundos - segundosFeitos; 
+        
+        PieChart.Data fatiaFeita = new PieChart.Data("Trabalhado", segundosFeitos);
+        PieChart.Data fatiaFalta = new PieChart.Data("Falta", segundosFalta);
+
+        graficoObjetivo.getData().clear();
         graficoObjetivo.getData().addAll(fatiaFeita, fatiaFalta);
 
         //css bonito caixinhas
@@ -241,9 +249,9 @@ public class GUI extends Application{
         cenario.getStylesheets().add(css);
 
         //Palco
-        palco.setTitle("PALCO");
-        palco.setScene(cenario);
-        palco.show();
+        TimeTracker.setTitle("PALCO");
+        TimeTracker.setScene(cenario);
+        TimeTracker.show();
     }
 
     public static void main(String[] args) {
