@@ -3,6 +3,8 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.platform.win32.WinDef.HWND;
 
 public interface kbmInputs extends Library{
     kbmInputs INSTANCE = Native.load("user32", kbmInputs.class);
@@ -24,4 +26,6 @@ public interface kbmInputs extends Library{
 
     boolean GetLastInputInfo(LASTINPUTINFO resultado);
 
+    //Descobre o ID da janela para o kernel32 pedir o PID desta mesma janela
+    int GetWindowThreadProcessId(HWND hWnd, IntByReference lpdwProcessId);
 }

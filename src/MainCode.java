@@ -2,6 +2,10 @@ package src;
 import java.time.LocalDateTime;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.ptr.IntByReference;
 
 
 public class MainCode {
@@ -37,6 +41,11 @@ public class MainCode {
             Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
             //descobre o nome de onde está
             kbmInputs.INSTANCE.GetWindowTextW(windowsPointer, guardiaoTexto, 1024);
+            
+            HWND hwnd = new HWND(windowsPointer);
+            //apanhar o caminho do executável
+            String caminho = getCaminhoEXE(hwnd);
+            System.out.println("Janela: " + Native.toString(guardiaoTexto) + "| Caminho: " + caminho);
 
             //AFK finder
             kbmInputs.LASTINPUTINFO info = new kbmInputs.LASTINPUTINFO();
@@ -80,6 +89,33 @@ public class MainCode {
             //serve só para ele esperar para mandar outro se não for recebido, para não matar o PC
             Thread.sleep(1000);
         }
+    }
+
+    public static String getCaminhoEXE(HWND ID) {
+        //sitio onde vamos guardar o PID da app
+        IntByReference PID = new IntByReference();
+
+        //ir buscar o ID que vai ser buscado pelo User32 (o nosso kbmInputs (sim, devia mudar o nome))
+        kbmInputs.INSTANCE.GetWindowThreadProcessId(ID, PID);
+
+        //já tenho o PID guardado, agr preciso de pedir permissões para tirar as informações
+        Pointer processo = kernel32.INSTANCE.OpenProcess(kernel32.PROCESS_QUERY_INFORMATION | kernel32.PROCESS_VM_READ, false, PID.getValue());
+
+        if(processo == null) {
+            return "";
+        }
+        
+        byte[] buffer = new byte[1024];
+        IntByReference tamanho = new IntByReference(buffer.length);
+        //perguntar o caminho, true se correr vem
+        if(kernel32.INSTANCE.QueryFullProcessImageNameA(processo, 0, buffer, tamanho)) {
+            kernel32.INSTANCE.CloseHandle(processo);
+            //String linda do caminho
+            return Native.toString(buffer);
+        }
+
+        kernel32.INSTANCE.CloseHandle(processo);
+        return "";
     }
 
     //função para limpar o título (para não criar 2 tabelas iguais onde o nome muda uma virgula)

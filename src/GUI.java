@@ -32,7 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class GUI extends Application{
-    public void start(Stage TimeTracker) {
+    public void start(Stage palco) {
 
         //novo layout, vamos fazer duas grelhas, uma de cima, com o gráfico de barras e a lista e uma de baixo, com botoes e objetivo
         VBox layoutPrincipal = new VBox(20); //espaço entre andares
@@ -249,9 +249,9 @@ public class GUI extends Application{
         cenario.getStylesheets().add(css);
 
         //Palco
-        TimeTracker.setTitle("PALCO");
-        TimeTracker.setScene(cenario);
-        TimeTracker.show();
+        palco.setTitle("Time Tracker");
+        palco.setScene(cenario);
+        palco.show();
     }
 
     public static void main(String[] args) {
