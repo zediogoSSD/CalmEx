@@ -1,7 +1,6 @@
 package src;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.io.File;
+import javax.swing.filechooser.FileSystemView; // Para pedir o ícone ao Windows
+import java.awt.image.BufferedImage;           // Formato de imagem antigo
+import javafx.embed.swing.SwingFXUtils;        // O Tradutor (Swing -> FX)
+import javafx.scene.image.Image;               // A imagem final que queremos
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+
 
 public class GUI extends Application{
     public void start(Stage palco) {
@@ -252,6 +260,39 @@ public class GUI extends Application{
         palco.setTitle("Time Tracker");
         palco.setScene(cenario);
         palco.show();
+
+
+       
+    }
+
+     //ir buscar icon da app
+    private Image carregarIcone(String caminho) {
+        try {
+            if (caminho == null || caminho.isEmpty()) return null;
+
+            File ficheiro = new File(caminho);
+            if (!ficheiro.exists()) return null;
+
+            // 1. Pedir o ícone ao sistema operativo
+            Icon icon = FileSystemView.getFileSystemView().getSystemIcon(ficheiro);
+            
+            // 2. Preparar uma tela vazia (BufferedImage)
+            BufferedImage bImg = new BufferedImage(
+                icon.getIconWidth(), 
+                icon.getIconHeight(), 
+                BufferedImage.TYPE_INT_ARGB
+            );
+            
+            // 3. Pintar o ícone nessa tela
+            icon.paintIcon(null, bImg.getGraphics(), 0, 0);
+
+            // 4. Converter para formato JavaFX
+            return SwingFXUtils.toFXImage(bImg, null);
+
+        } catch (Exception e) {
+            System.out.println("Erro ao carregar ícone: " + e.getMessage());
+            return null; // Se falhar, devolvemos nulo (depois pomos um ícone genérico)
+        }
     }
 
     public static void main(String[] args) {

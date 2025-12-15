@@ -6,6 +6,7 @@
         "libs/javafx.base.jar",      
         "libs/javafx.controls.jar",  
         "libs/javafx.fxml.jar",      
-        "libs/javafx.graphics.jar"   
+        "libs/javafx.graphics.jar",
+        "libs/javafx.swing.jar"
     ]
 }

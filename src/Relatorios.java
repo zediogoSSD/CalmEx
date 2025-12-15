@@ -3,9 +3,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Comparator;
 
 public class Relatorios {
 
@@ -174,5 +177,77 @@ public class Relatorios {
         }
     
         return topApps;
+    }
+
+    public static class DadosApp {
+        public String nome; 
+        public int tempo;
+        public String caminho;
+
+        public DadosApp(String nome, int tempo, String caminho) {
+            this.nome = nome;
+            this.tempo = tempo;
+            this.caminho = caminho;
+        }
+
+        public static List<DadosApp> getTopApps() {
+
+            String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal, MAX(CaminhoEXE) as Caminho " + "FROM atividades " + "WHERE date(DataInicio) = date('now') " + "GROUP BY NomeJanela";
+            Map<String, DadosApp> mapaAgrupado = new HashMap<>();
+
+            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+                
+                while (rs.next()) {
+                    String nomeCru = rs.getString("NomeJanela");
+                    int tempoLido = rs.getInt("TempoTotal");
+                    String caminhoLido = rs.getString("Caminho");
+
+                    String nomeLimpo = limparNome(nomeCru);
+                    if(nomeLimpo == null || nomeLimpo.trim().isEmpty()) {
+                        continue;
+                    }
+
+                    //Acontece quando a app já está na BD, e precisa de atualizar o tempo dessa app
+                    if(mapaAgrupado.containsKey(nomeLimpo)) {
+                        //dado registado no mapa
+                        DadosApp appExistente = mapaAgrupado.get(nomeLimpo);
+
+                        //Somar o tempo novo ao que ele já tinha
+                        appExistente.tempo += tempoLido;
+
+                        //Verifica se o icone precisa de ser atualizado, pôr icon nas aplicações que estavam guardadas sem icon
+                        if(appExistente.caminho == null || appExistente.caminho.isEmpty()) {
+                            appExistente.caminho = caminhoLido;
+                        }
+
+                    //else = situação em que é a primeira vez que usamos uma app, criamos um novo DadosApp e metemos no map    
+                    } else {
+                        DadosApp appNova = new DadosApp(nomeLimpo, tempoLido, caminhoLido);
+                        mapaAgrupado.put(nomeLimpo, appNova);
+                    }
+                }
+
+            } catch (Exception e) {
+                System.out.println("Erro no top 5: " + e.getMessage());
+            }
+
+
+            //Ordenar e cortar a lista
+            List<DadosApp> listaFinal = new ArrayList<>(mapaAgrupado.values());
+            //ordenar por tempo
+            listaFinal.sort(new Comparator<DadosApp>() {
+                public int compare(DadosApp app1, DadosApp app2) {
+                    //comparamos app2 com app1 para ordenar de maneira decrescente
+                    return Integer.compare(app2.tempo, app1.tempo);
+                }
+            });
+
+            if(listaFinal.size() > 5) {
+                return listaFinal.subList(0, 5);
+            }
+            return listaFinal;
+        }
     }
 }
