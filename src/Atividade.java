@@ -6,10 +6,12 @@ public class Atividade {
     public String janelaName;
     public LocalDateTime horaInicio;
     public LocalDateTime horaFim;
+    public String caminhoExecutavel;
 
-    public Atividade(String janela) {
-        this.janelaName = janela;
+    public Atividade(String nome, String caminho) {
+        this.janelaName = nome;
         this.horaInicio = LocalDateTime.now();
+        this.caminhoExecutavel = caminho;
     }
 
     public long duracaoSegundos() {

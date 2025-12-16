@@ -14,3 +14,36 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
 
 }
+
+/* Fundo da barra (o caminho vazio) */
+.progress-bar .track {
+    -fx-background-color: #d2d2d2; /* Cinzento claro */
+    -fx-background-radius: 10;     /* Bordas redondas */
+}
+
+/* A parte cheia da barra */
+.progress-bar .bar {
+    -fx-background-color: #435fc4; 
+    -fx-background-radius: 10;     /* Bordas redondas */
+    -fx-padding: 4px;              /* Um pouco mais grossa */
+}
+
+/* Muda a cor de preenchimento de TODAS as barras para azul */
+.chart-bar {
+    /* Este código hex (#0078D7) é um azul padrão bonito.
+       Podes trocar por "blue" ou outro código se quiseres um tom diferente. */
+    -fx-bar-fill: #0078D7; 
+    /* Opcional: Adiciona uma borda subtil para definir melhor as barras */
+    -fx-border-color: derive(#0078D7, -20%); /* Um tom mais escuro do mesmo azul */
+    -fx-border-width: 1px;
+}
+
+/* (Opcional) Muda a cor quando passas o rato por cima da barra */
+.chart-bar:hover {
+    -fx-bar-fill: #005a9e; /* Um azul ligeiramente mais escuro para dar efeito */
+}
+
+/* Retira a cor de fundo da área do gráfico para ficar limpo */
+.chart-plot-background {
+    -fx-background-color: transparent;
+}

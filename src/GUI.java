@@ -15,11 +15,11 @@ import java.time.temporal.TemporalAdjusters;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -27,6 +27,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -35,8 +36,11 @@ import javax.swing.filechooser.FileSystemView; // Para pedir o ícone ao Windows
 import java.awt.image.BufferedImage;           // Formato de imagem antigo
 import javafx.embed.swing.SwingFXUtils;        // O Tradutor (Swing -> FX)
 import javafx.scene.image.Image;               // A imagem final que queremos
+import javafx.scene.image.ImageView;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
+
+//progress bar
+import javafx.scene.control.ProgressBar;
 
 
 public class GUI extends Application{
@@ -62,7 +66,7 @@ public class GUI extends Application{
         //grelha de baixo
         GridPane grelhaBaixo = new GridPane();
         grelhaBaixo.setHgap(20);
-        //piechart fica maior que os botoes
+        //progress bar fica maior que os botoes
         ColumnConstraints colunaBotoes = new ColumnConstraints();
         colunaBotoes.setPercentWidth(40);
 
@@ -71,6 +75,8 @@ public class GUI extends Application{
 
         grelhaBaixo.getColumnConstraints().addAll(colunaBotoes, colunaPieChart);
 
+        //VARIAVEL GERAL
+        Map<String, Integer> dadosTempoGerais = Relatorios.getTempoPorDia();
         
         //---Gráfico de Barras---
         //definir os eixos
@@ -102,7 +108,7 @@ public class GUI extends Application{
         serieDados.setName("Horas Trabalhadas");
 
         //buscar os dados reais à BD
-        Map<String, Integer> dadosReais = Relatorios.getTempoPorDia();
+        Map<String, Integer> dadosReais = dadosTempoGerais;
 
         //buscar data de hoje
         LocalDate hoje = LocalDate.now();
@@ -120,12 +126,10 @@ public class GUI extends Application{
 
             //verifica se existe dados para o dia, senão, põe 0
             int segundos = dadosReais.getOrDefault(dados, 0);
-
             double horas = segundos / 3600.0;
-
             String nomeDia = diaLoop.getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("pt", "PT"));
 
-            serieDados.getData().add(new XYChart.Data(nomeDia, horas));
+            serieDados.getData().add(new XYChart.Data<>(nomeDia, horas));
         }
 
         //adicionar dados
@@ -142,56 +146,46 @@ public class GUI extends Application{
         Label tituloListaApps = new Label("Apps mais usadas");
 
         //lista das apps
-        ListView<String> listaApps = new ListView<>();
+        ListView<HBox> listaApps = new ListView<>();
         //dados
-        Map<String, Integer> dadosBrutos = Relatorios.getAppsMaisUsadasPorDia();
-        Map<String, Integer> listaLimpa = new LinkedHashMap<>();
+        List<Relatorios.DadosApp> topApps = Relatorios.DadosApp.getTopApps();
 
-        for(Map.Entry<String, Integer> umAum : dadosBrutos.entrySet()) {
-            String nomeApp = umAum.getKey();
-            int tempo = umAum.getValue();
+        if (topApps.isEmpty()) {
+            listaApps.getItems().add(new HBox(new Label("Sem dados hoje...")));
+        } else {
+            for (Relatorios.DadosApp app : topApps) {
 
-            if (nomeApp == null || nomeApp.trim().isEmpty()) {
-                continue; 
-            }
+                System.out.println("APP: " + app.nome + " | CAMINHO: " + app.caminho);
 
-            //serve só para aparecer o nome da app e não as tabs
-            String[] partes = nomeApp.split(" - ");
-            String nomeLimpo = partes[partes.length - 1].trim();
-
-            //nova lista para não haver duplicados (ele soma o tempo de todos os duplicados)
-            listaLimpa.put(nomeLimpo, listaLimpa.getOrDefault(nomeLimpo, 0) + tempo);
-        }
-
-        List<Map.Entry<String, Integer>> listaOrdenada = new ArrayList<>(listaLimpa.entrySet());
-
-        listaOrdenada.sort((a, b) -> b.getValue().compareTo(a.getValue()));
-
-        for(Map.Entry<String, Integer> app : listaOrdenada) {
-            String nome = app.getKey();
-            int tempo = app.getValue();
-
-            String bonita;
-            if(tempo < 60) {
-               bonita = nome + " - " + tempo + "s";
-            } else {
-                int horas = tempo / 3600;
-                int restoDasHoras = tempo % 3600;
-                int minutosRestantes = restoDasHoras / 60;
-
-                if (horas > 0) {
-                    bonita = nome + " - " + horas + "h " + minutosRestantes + "m"; 
-                } else {
-                    bonita = nome + " - " + minutosRestantes + "m"; 
+                //icones
+                ImageView visualIcone = new ImageView();
+                Image imagem = carregarIcone(app.caminho); 
+                
+                if (imagem != null) {
+                    visualIcone.setImage(imagem);
+                    visualIcone.setFitWidth(32);
+                    visualIcone.setFitHeight(32);
                 }
+
+                //texto bonito
+                String tempoTexto = formatarTempo(app.tempo);
+                Label texto = new Label(app.nome + "\n" + tempoTexto);
+                texto.setStyle("-fx-font-size: 13px;");
+
+                //juntar icones com o texto
+                HBox linha = new HBox(15, visualIcone, texto);
+                linha.setPadding(new Insets(10, 0, 10, 5));
+                linha.setAlignment(Pos.CENTER_LEFT);
+
+                listaApps.getItems().add(linha);
             }
-
-            listaApps.getItems().add(bonita);
         }
-        
 
+        //lista ocupar o tamanho todo da lista
+        VBox.setVgrow(listaApps, Priority.ALWAYS);
+        
         //lista na vertical
-        VBox caixaVertical = new VBox(10); //10 é o espaço entre as apps
+        VBox caixaVertical = new VBox(10);
         caixaVertical.getChildren().addAll(tituloListaApps, listaApps);
         caixaVertical.getStyleClass().add("caixinhas");
         caixaVertical.setFillWidth(true);
@@ -202,34 +196,48 @@ public class GUI extends Application{
 
 
 
-        //---Objetivo (PieChart)---
-        PieChart graficoObjetivo = new PieChart();
-        graficoObjetivo.setTitle("Objetivo Diário");
+        //---Objetivo (progressBar)---
 
-        //criar fatias
-        int objetivoHoras = 5;
-        int objetivoSegundos = objetivoHoras * 3600;
+        //objetivo
+        int horasObjetivo = 5;
+        int segundosObjetivo = horasObjetivo * 3600;
 
-        String chave = LocalDate.now().toString();
+        // Buscar o tempo feito hoje
+        String chaveHoje = LocalDate.now().toString();
+        int segundosFeitos = 0;
+        if(dadosTempoGerais != null) {
+            segundosFeitos = dadosTempoGerais.getOrDefault(chaveHoje, 0);
+        }
 
-        int segundosFeitos = Relatorios.getTempoPorDia().getOrDefault(chave, 0);
-
-        int segundosFalta = objetivoSegundos - segundosFeitos; 
+        // 2. Calcular a Percentagem (0.0 a 1.0)
+        double progresso = (double) segundosFeitos / segundosObjetivo;
         
-        PieChart.Data fatiaFeita = new PieChart.Data("Trabalhado", segundosFeitos);
-        PieChart.Data fatiaFalta = new PieChart.Data("Falta", segundosFalta);
+        // Impedir que a barra "rebente" se trabalhares mais que o objetivo
+        if (progresso > 1.0) {
+            progresso = 1.0;
+        }
 
-        graficoObjetivo.getData().clear();
-        graficoObjetivo.getData().addAll(fatiaFeita, fatiaFalta);
+        // 3. Criar a Barra Visual
+        ProgressBar barraObjetivo = new ProgressBar(progresso);
+        barraObjetivo.setPrefWidth(Double.MAX_VALUE); // Ocupar a largura toda disponível
+        barraObjetivo.setPrefHeight(20);              // Altura da barra (mais gordinha)
+
+        // 4. Criar os Textos
+        Label tituloObjetivo = new Label("Objetivo Diário");
+        tituloObjetivo.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+        String textoProgresso = formatarTempo(segundosFeitos) + " / " + horasObjetivo + "h";
+        Label labelDetalhe = new Label(textoProgresso);
 
         //css bonito caixinhas
-        VBox caixaPieChartObjetivo = new VBox(10, graficoObjetivo);
-        caixaPieChartObjetivo.getStyleClass().add("caixinhas");
+        VBox caixaObjetivo = new VBox(10);
+        caixaObjetivo.getChildren().addAll(tituloObjetivo, barraObjetivo, labelDetalhe);
+        caixaObjetivo.getStyleClass().add("caixinhas");
         //centrar
-        caixaPieChartObjetivo.setAlignment(Pos.CENTER);
+        caixaObjetivo.setAlignment(Pos.CENTER);
 
         //meter na grelha
-        grelhaBaixo.add(caixaPieChartObjetivo, 1, 1);
+        grelhaBaixo.add(caixaObjetivo, 1, 0);
 
 
 
@@ -241,14 +249,16 @@ public class GUI extends Application{
         Button btnSeguinte = new Button("Semana Seguinte >");
         
         //lado a lado
-        HBox caixaBotoes = new HBox(15); // 15 de espaço
+        HBox caixaBotoes = new HBox(15);
+        caixaBotoes.setAlignment(Pos.CENTER);
         caixaBotoes.getChildren().addAll(btnAnterior, btnDetalhes ,btnSeguinte);
 
         //meter na grelha
-        grelhaBaixo.add(caixaBotoes, 0, 1);
+        grelhaBaixo.add(caixaBotoes, 0, 0);
 
         
         //cenário
+        layoutPrincipal.getChildren().clear();
         layoutPrincipal.getChildren().addAll(grelhaCima, grelhaBaixo);
         Scene cenario = new Scene(layoutPrincipal, 1000, 650);
 
@@ -265,7 +275,22 @@ public class GUI extends Application{
        
     }
 
-     //ir buscar icon da app
+    //converter segundos em minutos e horas
+    private String formatarTempo(int tempo) {
+        int horas = tempo / 3600;
+        int minutos = (tempo / 3600) % 60;
+        int segundos = tempo % 60;
+
+        if(horas > 0) {
+            return horas + "h " + minutos + "m";
+        } else if(minutos > 0) {
+            return minutos + "m " + segundos + "s";
+        } else {
+            return segundos + "s";
+        }
+    }
+
+    //ir buscar icon da app
     private Image carregarIcone(String caminho) {
         try {
             if (caminho == null || caminho.isEmpty()) return null;

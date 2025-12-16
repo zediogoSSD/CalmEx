@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Comparator;
 
 public class Relatorios {
 
@@ -141,11 +140,11 @@ public class Relatorios {
          PreparedStatement stmt = conn.prepareStatement(sql);
          ResultSet rs = stmt.executeQuery()) {
 
-        while (rs.next()) {
-            String dia = rs.getString("Dia");
-            int tempo = rs.getInt("TempoTotal");
-            mapaTempo.put(dia, tempo);
-        }
+            while (rs.next()) {
+                String dia = rs.getString("Dia");
+                int tempo = rs.getInt("TempoTotal");
+                mapaTempo.put(dia, tempo);
+            }
 
         } catch (Exception e) {
             System.out.println("Erro ao buscar dias: " + e.getMessage());
@@ -166,11 +165,11 @@ public class Relatorios {
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()) {
 
-        while (rs.next()) {
-            String nome = rs.getString("NomeJanela");
-            int tempo = rs.getInt("TempoTotal");
-            topApps.put(nome, tempo);
-        }
+            while (rs.next()) {
+                String nome = rs.getString("NomeJanela");
+                int tempo = rs.getInt("TempoTotal");
+                topApps.put(nome, tempo);
+            }
 
         } catch (Exception e) {
             System.out.println("Erro ao buscar Top Apps: " + e.getMessage());
@@ -192,7 +191,7 @@ public class Relatorios {
 
         public static List<DadosApp> getTopApps() {
 
-            String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal, MAX(CaminhoEXE) as Caminho " + "FROM atividades " + "WHERE date(DataInicio) = date('now') " + "GROUP BY NomeJanela";
+            String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal, MAX(CaminhoExecutavel) as Caminho " + "FROM atividades " + "WHERE date(DataInicio) = date('now') " + "GROUP BY NomeJanela";
             Map<String, DadosApp> mapaAgrupado = new HashMap<>();
 
             try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
@@ -222,7 +221,7 @@ public class Relatorios {
                             appExistente.caminho = caminhoLido;
                         }
 
-                    //else = situação em que é a primeira vez que usamos uma app, criamos um novo DadosApp e metemos no map    
+                    //else = situação em que é a primeira vez que usamos uma app, criamos um novo DadosApp e metemos no map
                     } else {
                         DadosApp appNova = new DadosApp(nomeLimpo, tempoLido, caminhoLido);
                         mapaAgrupado.put(nomeLimpo, appNova);
@@ -236,14 +235,11 @@ public class Relatorios {
 
             //Ordenar e cortar a lista
             List<DadosApp> listaFinal = new ArrayList<>(mapaAgrupado.values());
-            //ordenar por tempo
-            listaFinal.sort(new Comparator<DadosApp>() {
-                public int compare(DadosApp app1, DadosApp app2) {
-                    //comparamos app2 com app1 para ordenar de maneira decrescente
-                    return Integer.compare(app2.tempo, app1.tempo);
-                }
-            });
+            
+            // IMPORTANTE: Isto ordena do MAIOR para o MENOR
+            listaFinal.sort((app1, app2) -> Integer.compare(app2.tempo, app1.tempo));
 
+            // Retorna apenas as top 5
             if(listaFinal.size() > 5) {
                 return listaFinal.subList(0, 5);
             }

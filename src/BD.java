@@ -25,7 +25,7 @@ public class BD {
 
     public static void salvarAtividade(Atividade ativ) {
     
-        String sql = "INSERT INTO atividades(NomeJanela, DataInicio, DataFim, Duracao) VALUES(?,?,?,?)";
+        String sql = "INSERT INTO atividades(NomeJanela, DataInicio, DataFim, Duracao, CaminhoExecutavel) VALUES(?,?,?,?,?)";
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -42,6 +42,11 @@ public class BD {
             // 4. Duração
             pstmt.setLong(4, ativ.duracaoSegundos());
 
+            if (ativ.caminhoExecutavel == null) {
+                pstmt.setString(5, ""); 
+            } else {
+                pstmt.setString(5, ativ.caminhoExecutavel);
+            }
             pstmt.executeUpdate();
             System.out.println("Dados guardados na BD!");
 

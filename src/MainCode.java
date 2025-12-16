@@ -78,7 +78,7 @@ public class MainCode {
                 }
 
                 //Muda e começa a contar o tempo na nova janela (aka Atividade)
-                Atividade janelaAtualAtividade = new Atividade(janelaAgora);
+                Atividade janelaAtualAtividade = new Atividade(janelaAgora, caminho);
                 atividade = janelaAtualAtividade;
 
                 janelaAtual = janelaAgora;
