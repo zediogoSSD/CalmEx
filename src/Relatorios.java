@@ -215,7 +215,7 @@ public class Relatorios {
             // IMPORTANTE: Isto ordena do MAIOR para o MENOR
             listaFinal.sort((app1, app2) -> Integer.compare(app2.tempo, app1.tempo));
 
-            if(listaFinal.size() > 6) return listaFinal.subList(0, 6);
+            if(listaFinal.size() > 5) return listaFinal.subList(0, 5);
             return listaFinal;
         }
     }

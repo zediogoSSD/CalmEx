@@ -7,7 +7,7 @@
 }
 
 .caixinhas {
-    -fx-baclkground-color: #ffffff;
+    -fx-background-color: #ffffff;
     -fx-border-color: #d1d5db;
     -fx-border-radius: 8;
     -fx-padding: 15;
@@ -52,4 +52,69 @@
     -fx-stroke: red;
     -fx-stroke-width: 2px; 
     -fx-stroke-dash-array: 10 5;
+}
+
+.caixa-media-flutuante {
+    /* Fundo branco ligeiramente transparente */
+    -fx-background-color: rgba(255, 255, 255, 0.85);
+    
+    /* Bordas arredondadas e subtis */
+    -fx-background-radius: 5;
+    -fx-border-color: #dddddd;
+    -fx-border-radius: 5;
+    
+    /* Espaçamento interno (Cima, Direita, Baixo, Esquerda) */
+    -fx-padding: 6 10 6 10;
+    
+    /* Sombra suave para destacar do gráfico */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);
+}
+
+.texto-media {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #555555; /* Cinzento escuro */
+}
+
+/*BOTES*/
+.botao-grande {
+    -fx-font-size: 14px;       /* Letra maior */
+    -fx-padding: 10 20 10 20;  /* Espaço à volta do texto (Cima, Direita, Baixo, Esquerda) */
+    -fx-background-radius: 5;  /* Cantos arredondados */
+    -fx-cursor: hand;          /* Mãozinha quando passas o rato */
+}
+
+/* Opcional: Efeito quando passas o rato */
+.botao-grande:hover {
+    -fx-background-color: #e0e0e0; /* Fica ligeiramente mais escuro */
+}
+
+
+/*LISTA*/
+
+/* 1. Remove a borda e o fundo cinzento da lista em si */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0; /* Remove o espaço entre a lista e a caixa */
+}
+
+/* 2. Esconde as células vazias (aquelas linhas "fantasmas" em baixo) */
+.list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* 3. Estilo das células que têm conteúdo */
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 5 0 5 0; /* Um pouco de ar entre cada app */
+    -fx-border-color: transparent transparent #eeeeee transparent; /* Linha subtil a separar */
+    -fx-border-width: 0 0 1 0;
+}
+
+/* 4. Remove a cor azul padrão quando clicas numa app (opcional, fica mais limpo) */
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: #f0f0f0; /* Um cinzento muito suave em vez de azul */
+    -fx-text-fill: black;
 }

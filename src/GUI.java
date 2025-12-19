@@ -31,11 +31,11 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-import src.Relatorios.DadosApp;
 
 import java.io.File;
 import javax.swing.filechooser.FileSystemView; // Para pedir o ícone ao Windows
@@ -47,13 +47,15 @@ import javax.swing.Icon;
 
 //progress bar
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Tooltip;
 
+import javafx.scene.layout.Region;
 
 public class GUI extends Application{
     public void start(Stage palco) {
 
         //novo layout, vamos fazer duas grelhas, uma de cima, com o gráfico de barras e a lista e uma de baixo, com botoes e objetivo
-        VBox layoutPrincipal = new VBox(10); //espaço entre andares
+        VBox layoutPrincipal = new VBox(20); //espaço entre andares
         layoutPrincipal.setPadding(new Insets(20));
 
         //grelha de cima
@@ -66,8 +68,13 @@ public class GUI extends Application{
         ColumnConstraints colunaListaApps = new ColumnConstraints();
         colunaListaApps.setPercentWidth(30);
 
-        //aplicar as larguras na grelha
+        RowConstraints linhaQueCresce = new RowConstraints();
+        linhaQueCresce.setVgrow(Priority.ALWAYS); // A linha ocupa o espaço vertical todo
+        linhaQueCresce.setFillHeight(true);
+
+        //aplicar as larguras e alturas na grelha
         grelhaCima.getColumnConstraints().addAll(colunaGrafico, colunaListaApps);
+        grelhaCima.getRowConstraints().add(linhaQueCresce);
 
         //grelha de baixo
         GridPane grelhaBaixo = new GridPane();
@@ -86,7 +93,7 @@ public class GUI extends Application{
         
 
         // Aqui fazemos tudo de uma vez: preparamos as barras, calculamos a média e achamos o máximo.
-        XYChart.Series serieDados = new XYChart.Series();
+        XYChart.Series<String, Number> serieDados = new XYChart.Series<>();
         serieDados.setName("Horas Trabalhadas");
 
         LocalDate hoje = LocalDate.now();
@@ -146,6 +153,23 @@ public class GUI extends Application{
         graficoSemanal.setTitle("Relatório Semanal");
         graficoSemanal.getData().add(serieDados);
 
+        //texto quando passamos o rato por cima
+        for (XYChart.Data<String, Number> dados : serieDados.getData()) {
+            // 1. Calcular o tempo bonito (ex: "1h 30m")
+            double horas = dados.getYValue().doubleValue();
+            int segundos = (int) (horas * 3600); // Converter de volta para segundos
+            String textoTooltip = formatarTempo(segundos);
+
+            //Criar o balao com o tempo
+            Tooltip tooltip = new Tooltip(textoTooltip);
+            tooltip.setStyle("-fx-font-size: 14px;"); // Letra maiorzinha
+            tooltip.setShowDelay(javafx.util.Duration.millis(100)); // Aparece quase instantaneamente
+
+            // 3. Colar na barra (Node)
+            // Nota: O 'Node' é a barra azul visual
+            Tooltip.install(dados.getNode(), tooltip);
+        }
+
 
         //-----criar a linha da média vermelha-----
         Line linhaMedia = new Line();
@@ -154,8 +178,28 @@ public class GUI extends Application{
         linhaMedia.setManaged(false); 
         linhaMedia.setVisible(false);
 
+        //caixinha no canto a dizer a média
+        String textoMedia = formatarTempo((int)(valorMediaFinal * 3600));
+        Label labelMedia = new Label("Média: " + textoMedia);
+        labelMedia.getStyleClass().add("texto-media");
+
+        // Ícone da Linha
+        Line iconeLinha = new Line(0, 0, 15, 0);
+        iconeLinha.getStyleClass().add("linha-media");
+
+        // A Caixinha
+        HBox boxMedia = new HBox(8, iconeLinha, labelMedia);
+        boxMedia.setAlignment(Pos.CENTER);
+        boxMedia.getStyleClass().add("caixa-media-flutuante");
+        
+        // Importante: Impede a caixa de esticar
+        boxMedia.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
+
         //CAMADAS
-        StackPane graficoCamadas = new StackPane(graficoSemanal, linhaMedia); 
+        StackPane graficoCamadas = new StackPane(graficoSemanal, linhaMedia, boxMedia);
+        StackPane.setAlignment(boxMedia, Pos.TOP_RIGHT); // Canto Superior Direito
+        StackPane.setMargin(boxMedia, new Insets(5, 15, 0, 0));
 
         //teste css
         linhaMedia.setStyle("-fx-stroke: red; -fx-stroke-width: 3px;");
@@ -207,6 +251,9 @@ public class GUI extends Application{
         caixaGrafico.getStyleClass().add("caixinhas");
         caixaGrafico.setFillWidth(true);
 
+        //para o gráfico tbm crescer quando a janela cresce
+        VBox.setVgrow(graficoCamadas, Priority.ALWAYS);
+
         //meter na grelha (este 0,0 é o primeiro bloco da grelha, que está dividida em 4 partes, 2x2)
         grelhaCima.add(caixaGrafico, 0, 0);
         
@@ -249,15 +296,24 @@ public class GUI extends Application{
             }
         }
 
+        //limitar o espaço para as apps
+        listaApps.setMaxHeight(Double.MAX_VALUE);
         //lista ocupar o tamanho todo da lista
         VBox.setVgrow(listaApps, Priority.ALWAYS);
+
+        listaApps.setStyle("-fx-background-insets: 0; -fx-padding: 0;");
         
         //lista na vertical
         VBox caixaVertical = new VBox(10);
         caixaVertical.getChildren().addAll(tituloListaApps, listaApps);
         caixaVertical.getStyleClass().add("caixinhas");
-        caixaVertical.setFillWidth(true);
 
+        //não ficar com espaço morto
+        caixaVertical.setStyle("-fx-padding: 15 15 5 15;");
+
+        //crescer a lista de apps mais usadas
+        VBox.setVgrow(listaApps, Priority.ALWAYS);
+        
         //meter na grelha
         grelhaCima.add(caixaVertical, 1, 0);
 
@@ -308,12 +364,14 @@ public class GUI extends Application{
 
 
 
-
         //---Botões---
         
         Button btnAnterior = new Button("< Semana Anterior");
+        btnAnterior.getStyleClass().add("botao-grande");
         Button btnDetalhes = new Button("Detalhes");
+        btnDetalhes.getStyleClass().add("botao-grande");
         Button btnSeguinte = new Button("Semana Seguinte >");
+        btnSeguinte.getStyleClass().add("botao-grande");
         
         //lado a lado
         HBox caixaBotoes = new HBox(15);
@@ -327,6 +385,9 @@ public class GUI extends Application{
         //cenário
         layoutPrincipal.getChildren().clear();
         layoutPrincipal.getChildren().addAll(grelhaCima, grelhaBaixo);
+        //cresce a grelha de cima o máximo, para quando aumentas o tamanho da janela, os botoes e a progress bar ficar lá em baixo
+        VBox.setVgrow(grelhaCima, Priority.ALWAYS);
+
         Scene cenario = new Scene(layoutPrincipal, 1000, 650);
 
         //ligar css ao GUI
