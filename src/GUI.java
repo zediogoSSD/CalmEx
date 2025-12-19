@@ -1,7 +1,5 @@
 package src;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +11,14 @@ import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
 
 import javafx.application.Application;
+
+//listener para a linha média
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.Node;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -28,8 +31,11 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
+import src.Relatorios.DadosApp;
 
 import java.io.File;
 import javax.swing.filechooser.FileSystemView; // Para pedir o ícone ao Windows
@@ -47,7 +53,7 @@ public class GUI extends Application{
     public void start(Stage palco) {
 
         //novo layout, vamos fazer duas grelhas, uma de cima, com o gráfico de barras e a lista e uma de baixo, com botoes e objetivo
-        VBox layoutPrincipal = new VBox(20); //espaço entre andares
+        VBox layoutPrincipal = new VBox(10); //espaço entre andares
         layoutPrincipal.setPadding(new Insets(20));
 
         //grelha de cima
@@ -78,9 +84,50 @@ public class GUI extends Application{
         //VARIAVEL GERAL
         Map<String, Integer> dadosTempoGerais = Relatorios.getTempoPorDia();
         
+
+        // Aqui fazemos tudo de uma vez: preparamos as barras, calculamos a média e achamos o máximo.
+        XYChart.Series serieDados = new XYChart.Series();
+        serieDados.setName("Horas Trabalhadas");
+
+        LocalDate hoje = LocalDate.now();
+        LocalDate inicioSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        double totalSegundosSemana = 0;
+        double maxHorasEncontrado = 0; // Para descobrirmos a barra mais alta
+
+        // Loop de 7 dias (Segunda a Domingo)
+        for (int i = 0; i < 7; i++) {
+            LocalDate diaLoop = inicioSemana.plusDays(i);
+            String chaveDia = diaLoop.toString();
+
+            // Buscar dados (se não houver, é 0)
+            int segundos = dadosTempoGerais.getOrDefault(chaveDia, 0);
+            double horas = segundos / 3600.0;
+
+            // A. Adicionar ao Gráfico (Eixo X e Y)
+            String nomeDia = diaLoop.getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("pt", "PT"));
+            serieDados.getData().add(new XYChart.Data<>(nomeDia, horas));
+
+            // B. Somar para a Média
+            totalSegundosSemana += segundos;
+
+            // C. Verificar se é o novo Máximo (para o teto do gráfico)
+            if (horas > maxHorasEncontrado) {
+                maxHorasEncontrado = horas;
+            }
+        }
+        
+        // Calcular a média final (sempre a dividir por 7 dias)
+        // Usamos 'final' para o Listener poder ler esta variável sem problemas
+        final double valorMediaFinal = (totalSegundosSemana / 7.0) / 3600.0;
+        
+        // Calcular o teto do gráfico: O Maior valor entre (Barra Mais Alta) e (Média)
+        // Multiplicamos por 1.1 para dar 10% de margem no topo
+        double tetoDoGrafico = Math.max(maxHorasEncontrado, valorMediaFinal) * 1.1;
+
+
         //---Gráfico de Barras---
         //definir os eixos
-
         //eixo X são categorias, dias da semana -> texto
         CategoryAxis eixoX = new CategoryAxis();
         eixoX.setLabel("Dias");
@@ -89,57 +136,80 @@ public class GUI extends Application{
         NumberAxis eixoY = new NumberAxis();
         eixoX.setLabel("Horas");
 
+        //teto
+        eixoY.setAutoRanging(false);
+        eixoY.setUpperBound(tetoDoGrafico); 
+        eixoY.setTickUnit(0.5);
 
         //criar o gráfico
         BarChart<String, Number> graficoSemanal = new BarChart<>(eixoX, eixoY);
         graficoSemanal.setTitle("Relatório Semanal");
+        graficoSemanal.getData().add(serieDados);
+
+
+        //-----criar a linha da média vermelha-----
+        Line linhaMedia = new Line();
+        //css bonito
+        linhaMedia.getStyleClass().add("linha-media");
+        linhaMedia.setManaged(false); 
+        linhaMedia.setVisible(false);
+
+        //CAMADAS
+        StackPane graficoCamadas = new StackPane(graficoSemanal, linhaMedia); 
+
+        //teste css
+        linhaMedia.setStyle("-fx-stroke: red; -fx-stroke-width: 3px;");
+        linhaMedia.setManaged(false); 
+        linhaMedia.setVisible(false);
+
+        //agr precisamos de um listener, ou seja, se o utilizador mudar o formato da página, queremos que a barra tbm mude com a janela
+        ChangeListener<Number> ajustaLinha = (obs, velho, novo) -> {
+            Platform.runLater(() -> {
+
+                Node areaDoGrafico = graficoSemanal.lookup(".chart-plot-background");
+
+                if (graficoSemanal == null || graficoSemanal.getHeight() > 0) {
+                    
+                    //perguntar ao Eixo Y: "Em que pixel fica a média?"
+                    double pixelY = eixoY.getDisplayPosition(valorMediaFinal);
+
+                    //coordenadas da área do gráfico
+                    double topoDoGrafico = areaDoGrafico.getBoundsInParent().getMinY();
+                    double esquerdaDoGrafico = areaDoGrafico.getBoundsInParent().getMinX();
+                    double larguraDoGrafico = areaDoGrafico.getBoundsInParent().getWidth();
+
+                    //mover a linha para o sítio certo
+                    // Y = Topo da área + o pixel que o eixo calculou
+                    linhaMedia.setStartY(topoDoGrafico + pixelY);
+                    linhaMedia.setEndY(topoDoGrafico + pixelY);
+
+                    //Da esquerda até à direita da área do gráfico
+                    linhaMedia.setStartX(esquerdaDoGrafico);
+                    linhaMedia.setEndX(esquerdaDoGrafico + larguraDoGrafico);
+
+                    //mostrar a linha
+                    linhaMedia.setVisible(true);
+                    //puxar a linha para a camada da frente
+                    linhaMedia.toFront();
+                }
+            });
+        };
+
+        graficoSemanal.heightProperty().addListener(ajustaLinha);
+        graficoSemanal.widthProperty().addListener(ajustaLinha);
+        
+        // Forçar o ouvinte a correr uma vez agora (para a linha aparecer logo no início)
+        Platform.runLater(() -> ajustaLinha.changed(null, 0, 0));
+
+
         //---Gráfico de Barras com css bonito
-        VBox caixaGrafico = new VBox(graficoSemanal);
+        VBox caixaGrafico = new VBox(graficoCamadas);
         caixaGrafico.getStyleClass().add("caixinhas");
         caixaGrafico.setFillWidth(true);
-
-
-        //----DADOS REAIS NO GRÁFICO DE BARRAS----
-        
-        //limpar dados
-        graficoSemanal.getData().clear();
-        //criar XY dados
-        XYChart.Series serieDados = new XYChart.Series();
-        serieDados.setName("Horas Trabalhadas");
-
-        //buscar os dados reais à BD
-        Map<String, Integer> dadosReais = dadosTempoGerais;
-
-        //buscar data de hoje
-        LocalDate hoje = LocalDate.now();
-
-        //descobrir a segunda nessa semana
-        LocalDate segunda = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-
-        //loop de 7 dias
-        for(int i = 0; i < 7; i++) {
-            //calcular dia atual
-            LocalDate diaLoop = segunda.plusDays(i);
-
-            //converter para String
-            String dados = diaLoop.toString();
-
-            //verifica se existe dados para o dia, senão, põe 0
-            int segundos = dadosReais.getOrDefault(dados, 0);
-            double horas = segundos / 3600.0;
-            String nomeDia = diaLoop.getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("pt", "PT"));
-
-            serieDados.getData().add(new XYChart.Data<>(nomeDia, horas));
-        }
-
-        //adicionar dados
-        graficoSemanal.getData().add(serieDados);
 
         //meter na grelha (este 0,0 é o primeiro bloco da grelha, que está dividida em 4 partes, 2x2)
         grelhaCima.add(caixaGrafico, 0, 0);
         
-
-
 
         //---Lista de apps mais usadas---
 
@@ -150,12 +220,10 @@ public class GUI extends Application{
         //dados
         List<Relatorios.DadosApp> topApps = Relatorios.DadosApp.getTopApps();
 
-        if (topApps.isEmpty()) {
+        if (topApps.isEmpty() || topApps == null) {
             listaApps.getItems().add(new HBox(new Label("Sem dados hoje...")));
         } else {
             for (Relatorios.DadosApp app : topApps) {
-
-                System.out.println("APP: " + app.nome + " | CAMINHO: " + app.caminho);
 
                 //icones
                 ImageView visualIcone = new ImageView();
@@ -217,12 +285,11 @@ public class GUI extends Application{
             progresso = 1.0;
         }
 
-        // 3. Criar a Barra Visual
+        //barra de progresso
         ProgressBar barraObjetivo = new ProgressBar(progresso);
         barraObjetivo.setPrefWidth(Double.MAX_VALUE); // Ocupar a largura toda disponível
         barraObjetivo.setPrefHeight(20);              // Altura da barra (mais gordinha)
 
-        // 4. Criar os Textos
         Label tituloObjetivo = new Label("Objetivo Diário");
         tituloObjetivo.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
@@ -278,7 +345,7 @@ public class GUI extends Application{
     //converter segundos em minutos e horas
     private String formatarTempo(int tempo) {
         int horas = tempo / 3600;
-        int minutos = (tempo / 3600) % 60;
+        int minutos = (tempo % 3600) / 60;
         int segundos = tempo % 60;
 
         if(horas > 0) {

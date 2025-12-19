@@ -47,3 +47,9 @@
 .chart-plot-background {
     -fx-background-color: transparent;
 }
+
+.linha-media {
+    -fx-stroke: red;
+    -fx-stroke-width: 2px; 
+    -fx-stroke-dash-array: 10 5;
+}

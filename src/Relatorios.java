@@ -153,31 +153,6 @@ public class Relatorios {
         return mapaTempo;
     }
 
-    public static Map<String, Integer> getAppsMaisUsadasPorDia() {
-        int limiteAFK = 3600; // 1 hora de limite para não contar AFK
-    
-        String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) = date('now') " + "AND Duracao < " + limiteAFK + " " + "GROUP BY NomeJanela " + "ORDER BY TempoTotal DESC " + "LIMIT 15";
-
-        //Usamos LinkedHashMap para ter ordem
-        Map<String, Integer> topApps = new LinkedHashMap<>();
-
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String nome = rs.getString("NomeJanela");
-                int tempo = rs.getInt("TempoTotal");
-                topApps.put(nome, tempo);
-            }
-
-        } catch (Exception e) {
-            System.out.println("Erro ao buscar Top Apps: " + e.getMessage());
-        }
-    
-        return topApps;
-    }
-
     public static class DadosApp {
         public String nome; 
         public int tempo;
@@ -190,8 +165,9 @@ public class Relatorios {
         }
 
         public static List<DadosApp> getTopApps() {
+            int limiteAFK = 3600; // 1 hora de limite para não contar AFK
 
-            String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal, MAX(CaminhoExecutavel) as Caminho " + "FROM atividades " + "WHERE date(DataInicio) = date('now') " + "GROUP BY NomeJanela";
+            String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal, MAX(CaminhoExecutavel) as Caminho " + "FROM atividades " + "WHERE date(DataInicio) = date('now', 'localtime') " + "AND Duracao < " + limiteAFK + " " + "GROUP BY NomeJanela";
             Map<String, DadosApp> mapaAgrupado = new HashMap<>();
 
             try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
@@ -235,14 +211,11 @@ public class Relatorios {
 
             //Ordenar e cortar a lista
             List<DadosApp> listaFinal = new ArrayList<>(mapaAgrupado.values());
-            
+
             // IMPORTANTE: Isto ordena do MAIOR para o MENOR
             listaFinal.sort((app1, app2) -> Integer.compare(app2.tempo, app1.tempo));
 
-            // Retorna apenas as top 5
-            if(listaFinal.size() > 5) {
-                return listaFinal.subList(0, 5);
-            }
+            if(listaFinal.size() > 6) return listaFinal.subList(0, 6);
             return listaFinal;
         }
     }
