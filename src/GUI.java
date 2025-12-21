@@ -2,7 +2,8 @@ package src;
 
 import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Locale;
 
 import java.time.DayOfWeek;
@@ -47,6 +48,7 @@ import javax.swing.Icon;
 
 //progress bar
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 
 import javafx.scene.layout.Region;
@@ -323,38 +325,85 @@ public class GUI extends Application{
         //---Objetivo (progressBar)---
 
         //objetivo
-        int horasObjetivo = 5;
-        int segundosObjetivo = horasObjetivo * 3600;
+        AtomicInteger horasObjetivo = new AtomicInteger(5);
 
-        // Buscar o tempo feito hoje
+        //tempo feito hoje
         String chaveHoje = LocalDate.now().toString();
         int segundosFeitos = 0;
         if(dadosTempoGerais != null) {
             segundosFeitos = dadosTempoGerais.getOrDefault(chaveHoje, 0);
         }
+        final int segundosFeitosFinal = segundosFeitos;
 
-        // 2. Calcular a Percentagem (0.0 a 1.0)
-        double progresso = (double) segundosFeitos / segundosObjetivo;
-        
-        // Impedir que a barra "rebente" se trabalhares mais que o objetivo
-        if (progresso > 1.0) {
-            progresso = 1.0;
-        }
-
-        //barra de progresso
-        ProgressBar barraObjetivo = new ProgressBar(progresso);
-        barraObjetivo.setPrefWidth(Double.MAX_VALUE); // Ocupar a largura toda disponível
-        barraObjetivo.setPrefHeight(20);              // Altura da barra (mais gordinha)
-
+        //texto e botoes
         Label tituloObjetivo = new Label("Objetivo Diário");
         tituloObjetivo.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
-        String textoProgresso = formatarTempo(segundosFeitos) + " / " + horasObjetivo + "h";
-        Label labelDetalhe = new Label(textoProgresso);
+        Button editarObjetivo = new Button("Editar ✎");
+        editarObjetivo.setStyle("-fx-font-size: 12px; -fx-padding: 2 5 2 5; -fx-background-radius: 20;");
+
+        //meter o editar ao lado do titulo
+        HBox cabecalhoObjetivo = new HBox(10, tituloObjetivo);
+        cabecalhoObjetivo.setAlignment(Pos.CENTER);
+
+        //barra de progresso
+        ProgressBar barraObjetivo = new ProgressBar(0);
+        barraObjetivo.setPrefWidth(Double.MAX_VALUE); // Ocupar a largura toda disponível
+        barraObjetivo.setPrefHeight(20);              // Altura da barra (mais gordinha)
+
+        Label labelDetalhe = new Label();
+
+        //atualizar tempo da barra
+        Runnable atualizarBarra = () -> {
+            int horasAtual = horasObjetivo.get();
+            int segundosMeta = horasAtual * 3600;
+
+            double progresso = (double) segundosFeitosFinal / segundosMeta;
+            if (progresso > 1.0) progresso = 1.0;
+
+            barraObjetivo.setProgress(progresso);
+            labelDetalhe.setText(formatarTempo(segundosFeitosFinal) + " / " + horasAtual + "h");
+            
+            // Muda a cor da barra se atingiu o objetivo
+            if (progresso >= 1.0) {
+                barraObjetivo.setStyle("-fx-accent: green;");
+            } else {
+                barraObjetivo.setStyle(null);
+            }
+        };
+
+        HBox tempoObjetivoEditar = new HBox(10, labelDetalhe, editarObjetivo);
+        tempoObjetivoEditar.setAlignment(Pos.CENTER);
+        atualizarBarra.run();
+
+        //página nova quando clica em editar
+        editarObjetivo.setOnAction(e -> {
+            TextInputDialog dialog = new TextInputDialog(String.valueOf(horasObjetivo.get()));
+            dialog.setTitle("Alterar Objetivo");
+            dialog.setHeaderText("Definir Meta Diária");
+            dialog.setContentText("Insira as horas:");
+
+            // O ícone da janela de diálogo (opcional, usa o stage principal)
+            dialog.initOwner(palco);
+
+            Optional<String> result = dialog.showAndWait();
+            
+            result.ifPresent(numero -> {
+                try {
+                    int novoValor = Integer.parseInt(numero);
+                    if(novoValor > 0 && novoValor < 24) {
+                        horasObjetivo.set(novoValor);
+                        atualizarBarra.run(); // Recalcula a barra e o texto
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("O utilizador não inseriu um número válido.");
+                }
+            });
+        });
 
         //css bonito caixinhas
         VBox caixaObjetivo = new VBox(10);
-        caixaObjetivo.getChildren().addAll(tituloObjetivo, barraObjetivo, labelDetalhe);
+        caixaObjetivo.getChildren().addAll(cabecalhoObjetivo, barraObjetivo, tempoObjetivoEditar);
         caixaObjetivo.getStyleClass().add("caixinhas");
         //centrar
         caixaObjetivo.setAlignment(Pos.CENTER);

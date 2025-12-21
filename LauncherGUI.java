@@ -1,5 +1,4 @@
 
-
 import src.GUI;
 
 public class LauncherGUI {
