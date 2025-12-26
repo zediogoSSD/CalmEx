@@ -3,6 +3,7 @@ package src;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Locale;
 
@@ -39,6 +40,10 @@ import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import javax.swing.filechooser.FileSystemView; // Para pedir o ícone ao Windows
 import java.awt.image.BufferedImage;           // Formato de imagem antigo
 import javafx.embed.swing.SwingFXUtils;        // O Tradutor (Swing -> FX)
@@ -135,7 +140,6 @@ public class GUI extends Application{
         double tetoDoGrafico = Math.max(maxHorasEncontrado, valorMediaFinal) * 1.1;
 
 
-        //---Gráfico de Barras---
         //definir os eixos
         //eixo X são categorias, dias da semana -> texto
         CategoryAxis eixoX = new CategoryAxis();
@@ -260,6 +264,8 @@ public class GUI extends Application{
         grelhaCima.add(caixaGrafico, 0, 0);
         
 
+
+
         //---Lista de apps mais usadas---
 
         Label tituloListaApps = new Label("Apps mais usadas");
@@ -325,7 +331,7 @@ public class GUI extends Application{
         //---Objetivo (progressBar)---
 
         //objetivo
-        AtomicInteger horasObjetivo = new AtomicInteger(5);
+        AtomicInteger horasObjetivo = new AtomicInteger(carregarObjetivo());
 
         //tempo feito hoje
         String chaveHoje = LocalDate.now().toString();
@@ -393,6 +399,7 @@ public class GUI extends Application{
                     int novoValor = Integer.parseInt(numero);
                     if(novoValor > 0 && novoValor < 24) {
                         horasObjetivo.set(novoValor);
+                        salvarObjetivo(novoValor);
                         atualizarBarra.run(); // Recalcula a barra e o texto
                     }
                 } catch (NumberFormatException ex) {
@@ -413,14 +420,18 @@ public class GUI extends Application{
 
 
 
+
         //---Botões---
         
         Button btnAnterior = new Button("< Semana Anterior");
         btnAnterior.getStyleClass().add("botao-grande");
+        
         Button btnDetalhes = new Button("Detalhes");
         btnDetalhes.getStyleClass().add("botao-grande");
+
         Button btnSeguinte = new Button("Semana Seguinte >");
         btnSeguinte.getStyleClass().add("botao-grande");
+        btnSeguinte.setVisible(false);
         
         //lado a lado
         HBox caixaBotoes = new HBox(15);
@@ -447,9 +458,6 @@ public class GUI extends Application{
         palco.setTitle("Time Tracker");
         palco.setScene(cenario);
         palco.show();
-
-
-       
     }
 
     //converter segundos em minutos e horas
@@ -494,6 +502,33 @@ public class GUI extends Application{
         } catch (Exception e) {
             System.out.println("Erro ao carregar ícone: " + e.getMessage());
             return null; // Se falhar, devolvemos nulo (depois pomos um ícone genérico)
+        }
+    }
+
+    private int carregarObjetivo() {
+        Properties props = new Properties();
+        try (FileInputStream in = new FileInputStream("config.properties")){
+            props.load(in);
+            // Tenta ler "meta_diaria", se não existir devolve "5"
+            String valor = props.getProperty("meta_diaria", "5");
+            return Integer.parseInt(valor);
+        } catch (NumberFormatException | IOException e) {
+            return 5;
+        }
+    }
+
+    private void salvarObjetivo(int novoValor) {
+        Properties props = new Properties();
+        try (FileInputStream in = new FileInputStream("config.properties")){
+            props.load(in);
+        } catch (IOException e) {
+            
+        }
+        props.setProperty("meta_diaria", String.valueOf(novoValor));
+        try (FileOutputStream out = new FileOutputStream("config.properties")){
+            props.store(out, "Configurações do Time Tracker");
+        } catch (IOException e) {
+            System.out.println("Erro ao guardar objetivo: " + e.getMessage());
         }
     }
 
