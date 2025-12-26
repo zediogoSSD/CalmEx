@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 
 import javafx.application.Application;
@@ -59,6 +60,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 
 public class GUI extends Application{
+
+    private LocalDate semanaAtualVisualizada;
+
     public void start(Stage palco) {
 
         //novo layout, vamos fazer duas grelhas, uma de cima, com o gráfico de barras e a lista e uma de baixo, com botoes e objetivo
@@ -96,22 +100,21 @@ public class GUI extends Application{
         grelhaBaixo.getColumnConstraints().addAll(colunaBotoes, colunaPieChart);
 
         //VARIAVEL GERAL
-        Map<String, Integer> dadosTempoGerais = Relatorios.getTempoPorDia();
+        LocalDate hoje = LocalDate.now();
+        this.semanaAtualVisualizada = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        Map<String, Integer> dadosTempoGerais = Relatorios.getTempoPorDia(semanaAtualVisualizada);
         
 
         // Aqui fazemos tudo de uma vez: preparamos as barras, calculamos a média e achamos o máximo.
         XYChart.Series<String, Number> serieDados = new XYChart.Series<>();
         serieDados.setName("Horas Trabalhadas");
 
-        LocalDate hoje = LocalDate.now();
-        LocalDate inicioSemana = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-
         double totalSegundosSemana = 0;
         double maxHorasEncontrado = 0; // Para descobrirmos a barra mais alta
 
         // Loop de 7 dias (Segunda a Domingo)
         for (int i = 0; i < 7; i++) {
-            LocalDate diaLoop = inicioSemana.plusDays(i);
+            LocalDate diaLoop = semanaAtualVisualizada.plusDays(i);
             String chaveDia = diaLoop.toString();
 
             // Buscar dados (se não houver, é 0)
@@ -432,6 +435,18 @@ public class GUI extends Application{
         Button btnSeguinte = new Button("Semana Seguinte >");
         btnSeguinte.getStyleClass().add("botao-grande");
         btnSeguinte.setVisible(false);
+
+        btnAnterior.setOnAction(e -> {
+            semanaAtualVisualizada = semanaAtualVisualizada.minusWeeks(1);
+            atualizarGrafico();
+            verBotoes(btnSeguinte);
+        });
+
+        btnSeguinte.setOnAction(e -> {
+            semanaAtualVisualizada = semanaAtualVisualizada.plusWeeks(1);
+            atualizarGrafico();
+            verBotoes(btnSeguinte);
+        });
         
         //lado a lado
         HBox caixaBotoes = new HBox(15);
@@ -530,6 +545,20 @@ public class GUI extends Application{
         } catch (IOException e) {
             System.out.println("Erro ao guardar objetivo: " + e.getMessage());
         }
+    }
+
+    private void verBotoes(Button btnSeguinte) {
+        LocalDate segundaFeiraAtualReal = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        
+        if (!semanaAtualVisualizada.isBefore(segundaFeiraAtualReal)) {
+            btnSeguinte.setVisible(false);
+        } else {
+            btnSeguinte.setVisible(true);
+        }
+    }
+
+    private void atualizarGrafico() {
+
     }
 
     public static void main(String[] args) {
