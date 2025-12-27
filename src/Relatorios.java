@@ -255,7 +255,7 @@ public class Relatorios {
                         // Limpar o nome para ficar bonito
                         String nomeLimpo = limparNome(nomeCru);
                         if (nomeLimpo != null && !nomeLimpo.isEmpty()) {
-                            listaHistorico.add(new LogItem(hora, nomeLimpo, caminho));
+                            listaHistorico.add(new LogItem(hora, nomeCru, caminho));
                         }
                     }
                 }

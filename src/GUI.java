@@ -605,7 +605,6 @@ public class GUI extends Application{
         });
     }
 
-    //mudar isto para ficar bonito e melhor (gemini fez mas vais melhorar isto)
     private void detalhesHistorico(Stage palco, LocalDate dataParaVer) {
         final Stage janelaDetalhes = new Stage();
         janelaDetalhes.initOwner(palco);
@@ -633,7 +632,9 @@ public class GUI extends Application{
 
         for (Relatorios.LogItem item : logItems) {
                 
-            //fazer "categorias" por dia
+            //fazer "categorias" por dia ??? (ns se faço ou mostro só o de hoje)
+
+            //mostrar horas
             Label labelHora = new Label(item.hora);
             labelHora.setPrefWidth(60);
             labelHora.setStyle("-fx-text-fill: #000000ff; -fx-font-size: 13px;");
@@ -656,18 +657,9 @@ public class GUI extends Application{
             labelNome.setStyle("-fx-text-fill: #000000ff; -fx-font-size: 14px;");
             HBox.setHgrow(labelNome, Priority.ALWAYS); // Empurra o resto para a direita
 
-            // 4. Caminho (URL ou Executável) - Texto cinzento à direita
-            String textoCaminho = (item.caminho == null) ? "" : item.caminho;
-            // Truque: Se for caminho de ficheiro longo, mostra só o final
-            if (textoCaminho.contains(File.separator)) {
-                textoCaminho = textoCaminho.substring(textoCaminho.lastIndexOf(File.separator) + 1);
-            }
-            Label labelCaminho = new Label(textoCaminho);
-            labelCaminho.setStyle("-fx-text-fill: #666666; -fx-font-size: 12px; -fx-font-style: italic;");
-            labelCaminho.setMaxWidth(250); // Não deixa ocupar a linha toda
                 
             // Juntar a Linha
-            HBox linha = new HBox(10, labelHora, caixaIcone, labelNome, labelCaminho);
+            HBox linha = new HBox(10, labelHora, caixaIcone, labelNome);
             linha.setAlignment(Pos.CENTER_LEFT);
             linha.setPadding(new Insets(8, 5, 8, 5));
             // Borda subtil por baixo de cada item
@@ -678,10 +670,11 @@ public class GUI extends Application{
         layoutDetalhes.getChildren().addAll(tituloHeader, listaHistorico);
 
         Scene cena = new Scene(layoutDetalhes, 700, 550);
-        // Tenta carregar o CSS global se existir, senão usa o inline acima
         try {
             cena.getStylesheets().add(getClass().getResource("estilo.css").toExternalForm());
-        } catch(Exception e) { /* CSS opcional */ }
+        } catch(Exception e) {
+            System.out.println("Deu merda");
+        }
 
         janelaDetalhes.setScene(cena);
         janelaDetalhes.show();
