@@ -102,7 +102,7 @@ public class GUI extends Application{
         //VARIAVEL GERAL
         LocalDate hoje = LocalDate.now();
         this.semanaAtualVisualizada = hoje.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        Map<String, Integer> dadosTempoGerais = Relatorios.getTempoPorDia(semanaAtualVisualizada);
+        Map<String, Integer> dadosTempoGerais = Relatorios.getTempoPorDia();
         
 
         // Aqui fazemos tudo de uma vez: preparamos as barras, calculamos a média e achamos o máximo.
@@ -154,7 +154,7 @@ public class GUI extends Application{
 
         //teto
         eixoY.setAutoRanging(false);
-        eixoY.setUpperBound(tetoDoGrafico); 
+        eixoY.setUpperBound(tetoDoGrafico);
         eixoY.setTickUnit(0.5);
 
         //criar o gráfico

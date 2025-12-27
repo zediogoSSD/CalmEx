@@ -3,7 +3,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,20 +130,15 @@ public class Relatorios {
         }
     }
 
-    public static Map<String, Integer> getTempoPorDia(LocalDate inicioSemana) {
+    public static Map<String, Integer> getTempoPorDia() {
         int limiteAFK = 3600;
-        LocalDate fimSemana = inicioSemana.plusDays(6);
-
-        String sql = "SELECT date(DataInicio) as Dia, SUM(Duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) BETWEEN ? AND ? " + "AND Duracao < " + limiteAFK + " " + "GROUP BY date(DataInicio) " + "ORDER BY Dia ASC";
+        String sql = "SELECT date(DataInicio) as Dia, SUM(Duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) >= date('now', '-7 days') " + "AND Duracao < " + limiteAFK + " " + "GROUP BY date(DataInicio) " + "ORDER BY Dia ASC";
         
         Map<String, Integer> mapaTempo = new HashMap<>();
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
          PreparedStatement stmt = conn.prepareStatement(sql);
          ResultSet rs = stmt.executeQuery()) {
-
-            stmt.setString(1, inicioSemana.toString());
-            stmt.setString(2, fimSemana.toString());
 
             while (rs.next()) {
                 String dia = rs.getString("Dia");
