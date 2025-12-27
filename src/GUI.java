@@ -130,7 +130,7 @@ public class GUI extends Application{
         eixoY.setTickUnit(0.5);
 
         //criar o gráfico
-        BarChart<String, Number> graficoSemanal = new BarChart<>(eixoX, eixoY);
+        this.graficoSemanal = new BarChart<>(eixoX, eixoY);
         graficoSemanal.setTitle("Relatório Semanal");
         graficoSemanal.getData().add(serieDados);
         //nao animação
@@ -138,15 +138,14 @@ public class GUI extends Application{
 
 
         //-----criar a linha da média vermelha-----
-        Line linhaMedia = new Line();
+        this.linhaMedia = new Line();
         //css bonito
         linhaMedia.getStyleClass().add("linha-media");
         linhaMedia.setManaged(false); 
         linhaMedia.setVisible(false);
 
         //caixinha no canto a dizer a média
-        String textoMedia = formatarTempo((int)(valorMediaFinal * 3600));
-        Label labelMedia = new Label("Média: " + textoMedia);
+        this.labelMedia = new Label("Média: 0h 00");
         labelMedia.getStyleClass().add("texto-media");
 
         // Ícone da Linha
@@ -529,7 +528,12 @@ public class GUI extends Application{
         // Calcular a média final (sempre a dividir por 7 dias)
         // Usamos 'final' para o Listener poder ler esta variável sem problemas
         this.valorMediaFinal = (totalSegundosSemana / 7.0) / 3600.0;
-        
+
+        if(labelMedia != null) {
+            String textoMedia = formatarTempo((int)(valorMediaFinal * 3600));
+            labelMedia.setText("Média: " + textoMedia);
+        }
+
         // Calcular o teto do gráfico: O Maior valor entre (Barra Mais Alta) e (Média)
         // Multiplicamos por 1.1 para dar 10% de margem no topo
         double tetoDoGrafico = Math.max(maxHorasEncontrado, valorMediaFinal) * 1.1;
@@ -560,6 +564,7 @@ public class GUI extends Application{
     private void atualizarLinhaMedia() {
         //só corre se tiver alguma coisa
         if (graficoSemanal == null || linhaMedia == null || eixoY == null) return;
+        //garante que as barras já estão desenhadas antes da linha da média
         Platform.runLater(() -> {
 
             Node areaDoGrafico = graficoSemanal.lookup(".chart-plot-background");
@@ -574,10 +579,12 @@ public class GUI extends Application{
                 double esquerdaDoGrafico = areaDoGrafico.getBoundsInParent().getMinX();
                 double larguraDoGrafico = areaDoGrafico.getBoundsInParent().getWidth();
 
+                //
+                double yFinal = topoDoGrafico + pixelY;
                 //mover a linha para o sítio certo
                 // Y = Topo da área + o pixel que o eixo calculou
-                linhaMedia.setStartY(topoDoGrafico + pixelY);
-                linhaMedia.setEndY(topoDoGrafico + pixelY);
+                linhaMedia.setStartY(yFinal);
+                linhaMedia.setEndY(yFinal);
 
                 //Da esquerda até à direita da área do gráfico
                 linhaMedia.setStartX(esquerdaDoGrafico);
