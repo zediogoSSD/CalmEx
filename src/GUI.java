@@ -533,6 +533,7 @@ public class GUI extends Application{
             String textoMedia = formatarTempo((int)(valorMediaFinal * 3600));
             labelMedia.setText("Média: " + textoMedia);
         }
+        atualizarLinhaMedia();
 
         // Calcular o teto do gráfico: O Maior valor entre (Barra Mais Alta) e (Média)
         // Multiplicamos por 1.1 para dar 10% de margem no topo
