@@ -355,7 +355,6 @@ public class GUI extends Application{
 
 
 
-
         //---Botões---
         
         Button btnAnterior = new Button("< Semana Anterior");
@@ -378,6 +377,10 @@ public class GUI extends Application{
             semanaAtualVisualizada = semanaAtualVisualizada.plusWeeks(1);
             atualizarGrafico();
             verBotoes(btnAnterior, btnSeguinte);
+        });
+
+        btnDetalhes.setOnAction(e -> {
+            detalhesHistorico();
         });
         
         //lado a lado
@@ -597,6 +600,11 @@ public class GUI extends Application{
                 linhaMedia.toFront();
             }
         });
+    }
+
+    private void detalhesHistorico() {
+        final Stage janelaDetalhes = new Stage();
+
     }
 
     public static void main(String[] args) {

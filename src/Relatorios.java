@@ -219,4 +219,50 @@ public class Relatorios {
             return listaFinal;
         }
     }
+
+    public static class LogItem {
+        public String hora;
+        public String nome;
+        public String caminho;
+
+        public LogItem(String hora, String nome, String caminho) {
+            this.hora = hora;
+            this.nome = nome;
+            this.caminho = caminho;
+        }
+
+        public static List<LogItem> getHistorico(String dataAlvo) {
+            //lista para o histórico
+            List<LogItem> listaHistorico = new ArrayList<>();
+
+            String sql = "SELECT strftime('%H:%M', DataInicio) as HoraFormatada, NomeJanela, CaminhoExecutavel " +
+                     "FROM atividades " +
+                     "WHERE date(DataInicio) = ? " +
+                     "ORDER BY DataInicio DESC";
+
+            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+                // Injeta a data que pedimos (ex: "2023-10-27")
+                stmt.setString(1, dataAlvo);
+            
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        String hora = rs.getString("HoraFormatada");
+                        String nomeCru = rs.getString("NomeJanela");
+                        String caminho = rs.getString("CaminhoExecutavel");
+
+                        // Limpar o nome para ficar bonito
+                        String nomeLimpo = limparNome(nomeCru);
+                        if (nomeLimpo != null && !nomeLimpo.isEmpty()) {
+                            listaHistorico.add(new LogItem(hora, nomeLimpo, caminho));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao buscar histórico: " + e.getMessage());
+            }
+            return listaHistorico;
+        }
+    }
 }
