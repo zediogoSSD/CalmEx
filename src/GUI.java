@@ -38,6 +38,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -380,7 +381,7 @@ public class GUI extends Application{
         });
 
         btnDetalhes.setOnAction(e -> {
-            detalhesHistorico();
+            detalhesHistorico(palco, LocalDate.now());
         });
         
         //lado a lado
@@ -409,6 +410,8 @@ public class GUI extends Application{
         palco.setScene(cenario);
         palco.show();
     }
+
+    //-----------FUNÇÕES AUXILIARES-----------
 
     //converter segundos em minutos e horas
     private String formatarTempo(int tempo) {
@@ -602,9 +605,86 @@ public class GUI extends Application{
         });
     }
 
-    private void detalhesHistorico() {
+    //mudar isto para ficar bonito e melhor (gemini fez mas vais melhorar isto)
+    private void detalhesHistorico(Stage palco, LocalDate dataParaVer) {
         final Stage janelaDetalhes = new Stage();
+        janelaDetalhes.initOwner(palco);
+        //dá block à janela atrás
+        janelaDetalhes.initModality(Modality.WINDOW_MODAL);
+        janelaDetalhes.setTitle("Histórico de Atividade");
 
+        //caixinha
+        VBox layoutDetalhes = new VBox(15);
+        layoutDetalhes.setPadding(new Insets(20));
+        layoutDetalhes.getStyleClass().add("caixinhas");
+
+        //titulo
+        Label tituloHeader = new Label("Histórico: " + dataParaVer.toString());
+        tituloHeader.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;");
+
+        // A Lista
+        ListView<HBox> listaHistorico = new ListView<>();
+        // Remove as bordas padrão do JavaFX para ficar clean
+        listaHistorico.setStyle("-fx-background-color: transparent; -fx-control-inner-background: transparent; -fx-padding: 0;");
+        VBox.setVgrow(listaHistorico, Priority.ALWAYS);
+
+        // --- BUSCAR DADOS DO RELATORIOS ---
+        List<Relatorios.LogItem> logItems = Relatorios.LogItem.getHistorico(dataParaVer.toString());
+
+        for (Relatorios.LogItem item : logItems) {
+                
+            //fazer "categorias" por dia
+            Label labelHora = new Label(item.hora);
+            labelHora.setPrefWidth(60);
+            labelHora.setStyle("-fx-text-fill: #000000ff; -fx-font-size: 13px;");
+            labelHora.setAlignment(Pos.CENTER_RIGHT);
+
+            // 2. Ícone
+            ImageView iconView = new ImageView();
+            Image icon = carregarIcone(item.caminho);
+            if (icon != null) {
+                iconView.setImage(icon);
+                iconView.setFitWidth(18);
+                iconView.setFitHeight(18);
+            }
+            HBox caixaIcone = new HBox(iconView);
+            caixaIcone.setPrefWidth(30);
+            caixaIcone.setAlignment(Pos.CENTER);
+
+            // 3. Nome da App/Aba
+            Label labelNome = new Label(item.nome);
+            labelNome.setStyle("-fx-text-fill: #000000ff; -fx-font-size: 14px;");
+            HBox.setHgrow(labelNome, Priority.ALWAYS); // Empurra o resto para a direita
+
+            // 4. Caminho (URL ou Executável) - Texto cinzento à direita
+            String textoCaminho = (item.caminho == null) ? "" : item.caminho;
+            // Truque: Se for caminho de ficheiro longo, mostra só o final
+            if (textoCaminho.contains(File.separator)) {
+                textoCaminho = textoCaminho.substring(textoCaminho.lastIndexOf(File.separator) + 1);
+            }
+            Label labelCaminho = new Label(textoCaminho);
+            labelCaminho.setStyle("-fx-text-fill: #666666; -fx-font-size: 12px; -fx-font-style: italic;");
+            labelCaminho.setMaxWidth(250); // Não deixa ocupar a linha toda
+                
+            // Juntar a Linha
+            HBox linha = new HBox(10, labelHora, caixaIcone, labelNome, labelCaminho);
+            linha.setAlignment(Pos.CENTER_LEFT);
+            linha.setPadding(new Insets(8, 5, 8, 5));
+            // Borda subtil por baixo de cada item
+            linha.setStyle("-fx-border-color: #333333; -fx-border-width: 0 0 1 0;");
+            listaHistorico.getItems().add(linha);
+        }
+
+        layoutDetalhes.getChildren().addAll(tituloHeader, listaHistorico);
+
+        Scene cena = new Scene(layoutDetalhes, 700, 550);
+        // Tenta carregar o CSS global se existir, senão usa o inline acima
+        try {
+            cena.getStylesheets().add(getClass().getResource("estilo.css").toExternalForm());
+        } catch(Exception e) { /* CSS opcional */ }
+
+        janelaDetalhes.setScene(cena);
+        janelaDetalhes.show();
     }
 
     public static void main(String[] args) {
