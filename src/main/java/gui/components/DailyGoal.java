@@ -1,7 +1,4 @@
-package src.app.gui.components;
-
-import src.app.utils.ConfigUtils;
-import src.app.utils.TimeUtils;
+package gui.components;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -10,6 +7,9 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import utils.ConfigUtils;
+import utils.TimeUtils;
+
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;

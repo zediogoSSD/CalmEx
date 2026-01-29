@@ -1,17 +1,16 @@
-package src.app.gui;
-
-import src.Relatorios;
-import src.app.MainApp;
-import src.app.gui.components.*;
-import src.app.gui.dialogs.HistoryDialog;
+package gui;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import gui.components.*;
+import gui.dialogs.*;
+import backend.Relatorios;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
+
 
 public class MainWindow {
 
@@ -72,9 +71,11 @@ public class MainWindow {
         VBox.setVgrow(topGrid, Priority.ALWAYS);
 
         Scene scene = new Scene(mainLayout, 1000, 650);
-        String css = MainApp.getCss();
-        if (css != null) {
+        try {
+            String css = Objects.requireNonNull(getClass().getResource("/estilo.css")).toExternalForm();
             scene.getStylesheets().add(css);
+        } catch (Exception e) {
+            System.out.println("Não foi possível carregar o CSS no MainWindow");
         }
 
         stage.setTitle("Time Tracker");

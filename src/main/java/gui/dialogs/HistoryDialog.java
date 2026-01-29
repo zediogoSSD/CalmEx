@@ -1,8 +1,5 @@
 package gui.dialogs;
 
-import src.Relatorios;
-import src.java.utils.MainApp;
-import src.app.utils.IconUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,6 +11,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import backend.Relatorios;
+import utils.IconUtils;
+import java.util.Objects;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -70,9 +71,11 @@ public class HistoryDialog {
         layout.getChildren().addAll(header, list);
         Scene scene = new Scene(layout, 700, 550);
 
-        String css = MainApp.getCss();
-        if (css != null) {
+        try {
+            String css = Objects.requireNonNull(HistoryDialog.class.getResource("/estilo.css")).toExternalForm();
             scene.getStylesheets().add(css);
+        } catch (Exception e) {
+            System.out.println("Could not load CSS: " + e.getMessage());
         }
 
         stage.setScene(scene);

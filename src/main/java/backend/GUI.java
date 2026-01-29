@@ -1,59 +1,38 @@
-package src;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.format.TextStyle;
-import java.time.temporal.TemporalAdjusters;
+package backend;
 
 import javafx.application.Application;
-
-//listener para a linha média
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.scene.Node;
-
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import javax.swing.filechooser.FileSystemView; // Para pedir o ícone ao Windows
-import java.awt.image.BufferedImage;           // Formato de imagem antigo
-import javafx.embed.swing.SwingFXUtils;        // O Tradutor (Swing -> FX)
-import javafx.scene.image.Image;               // A imagem final que queremos
-import javafx.scene.image.ImageView;
-import javax.swing.Icon;
-
-//progress bar
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Tooltip;
-
-import javafx.scene.layout.Region;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GUI extends Application{
 

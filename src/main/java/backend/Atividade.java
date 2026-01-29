@@ -1,6 +1,7 @@
-package src;
-import java.time.LocalDateTime;
+package backend;
+
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class Atividade {
     public String janelaName;

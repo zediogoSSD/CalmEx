@@ -1,18 +1,20 @@
-package src.app.gui.components;
-
-import javafx.scene.layout.*;
-import src.Relatorios; // Assuming this exists in src
-import src.app.utils.TimeUtils;
+package gui.components;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.geometry.Pos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.chart.*;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
+import utils.TimeUtils;
+
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.Locale;

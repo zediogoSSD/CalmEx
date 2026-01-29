@@ -1,4 +1,4 @@
-package src.app.utils;
+package utils;
 
 public class TimeUtils {
     public static String formatarTempo(int tempo) {

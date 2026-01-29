@@ -1,9 +1,10 @@
-package src.app.utils;
+package utils;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+
+import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.Icon;
 import java.awt.image.BufferedImage;
 import java.io.File;
 

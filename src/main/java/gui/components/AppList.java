@@ -1,8 +1,4 @@
-package src.app.gui.components;
-
-import src.Relatorios;
-import src.app.utils.IconUtils;
-import src.app.utils.TimeUtils;
+package gui.components;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,6 +8,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import backend.Relatorios;
+import utils.IconUtils;
+import utils.TimeUtils;
+
 import java.util.List;
 
 public class AppList extends VBox {
