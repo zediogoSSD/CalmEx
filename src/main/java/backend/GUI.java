@@ -469,7 +469,7 @@ public class GUI extends Application{
         Properties props = new Properties();
         try (FileInputStream in = new FileInputStream("config.properties")){
             props.load(in);
-        } catch (IOException _) {
+        } catch (IOException exception) {
 
         }
         props.setProperty("meta_diaria", String.valueOf(novoValor));

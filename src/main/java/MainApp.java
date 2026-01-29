@@ -1,4 +1,4 @@
-package src.app;
+package src;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -8,12 +8,12 @@ import java.net.URL;
 
 public class MainApp extends Application {
 
-    private static final String CSS_PATH = "/src/app/gui/estilo.css";
+    String css = this.getClass().getResource("/style.css").toExternalForm();
 
     public static String getCss() {
-        URL url = MainApp.class.getResource(CSS_PATH);
+        URL url = MainApp.class.getResource(getCss());
         if (url == null) {
-            System.out.println("CRITICAL ERROR: CSS not found at " + CSS_PATH);
+            System.out.println("CRITICAL ERROR: CSS not found at " + getCss());
             return null;
         }
         return url.toExternalForm();

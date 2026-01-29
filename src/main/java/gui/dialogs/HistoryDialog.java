@@ -1,7 +1,7 @@
-package src.app.gui.dialogs;
+package gui.dialogs;
 
 import src.Relatorios;
-import src.app.MainApp;
+import src.java.utils.MainApp;
 import src.app.utils.IconUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
