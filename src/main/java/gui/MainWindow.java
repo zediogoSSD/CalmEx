@@ -75,7 +75,7 @@ public class MainWindow {
 
         mainLayout.setPadding(new Insets(0, 20, 20, 20));
 
-        Scene scene = new Scene(mainLayout, 1000, 650);
+        Scene scene = new Scene(mainLayout, 1000, 680);
 
         stage.setTitle("Time Tracker");
         stage.setScene(scene);

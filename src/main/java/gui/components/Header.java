@@ -25,7 +25,7 @@ public class Header extends HBox {
 
     private void initComponents() {
         // Title on the left
-        Text title = new Text("Time Tracker");
+        Text title = new Text("CalmEx");
         title.getStyleClass().add("header-title");
 
         // Spacer to push button to the right

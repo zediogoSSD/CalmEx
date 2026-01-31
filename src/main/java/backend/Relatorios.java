@@ -196,8 +196,6 @@ public class Relatorios {
             String dataInicio = weekStart.toString(); // Format: YYYY-MM-DD
             String dataFim = weekEnd.toString();
 
-            System.out.println("Buscando apps entre " + dataInicio + " e " + dataFim);
-
             String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal, MAX(CaminhoExecutavel) as Caminho " + "FROM atividades " + "WHERE date(DataInicio) BETWEEN ? AND ? " + "AND Duracao < ? " + "GROUP BY NomeJanela";
             Map<String, DadosApp> mapaAgrupado = new HashMap<>();
 
