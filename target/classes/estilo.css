@@ -118,3 +118,31 @@
     -fx-background-color: #f0f0f0; /* Um cinzento muito suave em vez de azul */
     -fx-text-fill: black;
 }
+
+/* Header styles */
+.header-bar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #d1d5db transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.header-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-fill: #333333;
+}
+
+.dark-mode-toggle {
+    -fx-font-size: 20px;
+    -fx-background-color: #f4f6f8;
+    -fx-background-radius: 20;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.dark-mode-toggle:hover {
+    -fx-background-color: #e5e7eb;
+}

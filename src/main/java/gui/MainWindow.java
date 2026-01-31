@@ -19,6 +19,7 @@ public class MainWindow {
     private AppList appListComponent;
     private DailyGoal goalComponent;
     private Navigation navComponent;
+    private Header headerComponent;
 
     public MainWindow(Stage stage) {
         this.stage = stage;
@@ -27,6 +28,8 @@ public class MainWindow {
     public void show() {
         VBox mainLayout = new VBox(20);
         mainLayout.setPadding(new Insets(20));
+
+        headerComponent = new Header(this::toggleTheme);
 
         // 1. Initialize Components
         chartComponent = new WeeklyChart();
@@ -67,23 +70,41 @@ public class MainWindow {
         bottomGrid.add(goalComponent, 1, 0);
 
         // 4. Final Assembly
-        mainLayout.getChildren().addAll(topGrid, bottomGrid);
+        mainLayout.getChildren().addAll(headerComponent, topGrid, bottomGrid);
         VBox.setVgrow(topGrid, Priority.ALWAYS);
 
+        mainLayout.setPadding(new Insets(0, 20, 20, 20));
+
         Scene scene = new Scene(mainLayout, 1000, 650);
-        try {
-            String css = Objects.requireNonNull(getClass().getResource("/estilo.css")).toExternalForm();
-            scene.getStylesheets().add(css);
-        } catch (Exception e) {
-            System.out.println("Não foi possível carregar o CSS no MainWindow");
-        }
 
         stage.setTitle("Time Tracker");
         stage.setScene(scene);
+
+        loadCSS(false);
+
         stage.show();
 
         // Initial Load
         refreshData();
+    }
+
+    private void toggleTheme() {
+        boolean isDarkMode = headerComponent.isDarkMode();
+        loadCSS(isDarkMode);
+    }
+
+    private void loadCSS(boolean isDarkMode) {
+        Scene currentScene = stage.getScene();
+        if (currentScene != null) {
+            currentScene.getStylesheets().clear();
+            try {
+                String cssFile = isDarkMode ? "/estiloDark.css" : "/estilo.css";
+                String css = Objects.requireNonNull(getClass().getResource(cssFile)).toExternalForm();
+                currentScene.getStylesheets().add(css);
+            } catch (Exception e) {
+                System.out.println("Não foi possível carregar o CSS no MainWindow: " + e.getMessage());
+            }
+        }
     }
 
     private void refreshData() {

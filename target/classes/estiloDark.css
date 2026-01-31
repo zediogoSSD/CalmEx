@@ -1,0 +1,179 @@
+.root {
+    /*mudar cor de fundo*/
+    -fx-background-color: #1e1e2e;
+
+    /*mudar fonte global*/
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+.caixinhas {
+    -fx-background-color: #2a2a3e;
+    -fx-border-color: #3a3a4e;
+    -fx-border-radius: 8;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 2);
+}
+
+/* Fundo da barra (o caminho vazio) */
+.progress-bar .track {
+    -fx-background-color: #3a3a4e; /* Cinzento escuro */
+    -fx-background-radius: 10;     /* Bordas redondas */
+}
+
+/* A parte cheia da barra */
+.progress-bar .bar {
+    -fx-background-color: #5b7fd4;
+    -fx-background-radius: 10;     /* Bordas redondas */
+    -fx-padding: 4px;              /* Um pouco mais grossa */
+}
+
+/* Muda a cor de preenchimento de TODAS as barras para azul */
+.chart-bar {
+    -fx-bar-fill: #4a9eff;
+    -fx-border-color: derive(#4a9eff, -20%);
+    -fx-border-width: 1px;
+}
+
+/* (Opcional) Muda a cor quando passas o rato por cima da barra */
+.chart-bar:hover {
+    -fx-bar-fill: #6bb0ff;
+}
+
+/* Retira a cor de fundo da área do gráfico para ficar limpo */
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.linha-media {
+    -fx-stroke: #ff6b6b;
+    -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 10 5;
+}
+
+.caixa-media-flutuante {
+    -fx-background-color: rgba(42, 42, 62, 0.95);
+    -fx-background-radius: 5;
+    -fx-border-color: #4a4a6e;
+    -fx-border-radius: 5;
+    -fx-padding: 6 10 6 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 3, 0, 0, 1);
+}
+
+.texto-media {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+/*BOTÕES*/
+.botao-grande {
+    -fx-font-size: 14px;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-background-color: #3a3a4e;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Opcional: Efeito quando passas o rato */
+.botao-grande:hover {
+    -fx-background-color: #4a4a6e;
+}
+
+/*LISTA*/
+
+/* 1. Remove a borda e o fundo cinzento da lista em si */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+/* 2. Esconde as células vazias */
+.list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* 3. Estilo das células que têm conteúdo */
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 5 0 5 0;
+    -fx-border-color: transparent transparent #3a3a4e transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* 4. Remove a cor azul padrão quando clicas numa app */
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: #3a3a4e;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Text color for dark mode */
+.text {
+    -fx-fill: #e0e0e0;
+}
+
+.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Chart text colors */
+.chart-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.axis-label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.axis-tick-label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Header styles */
+.header-bar {
+    -fx-background-color: #16161e;
+    -fx-border-color: transparent transparent #3a3a4e transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.header-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-fill: #ffffff;
+}
+
+.dark-mode-toggle {
+    -fx-font-size: 20px;
+    -fx-background-color: #3a3a4e;
+    -fx-background-radius: 20;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+    -fx-border-color: #4a4a6e;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.dark-mode-toggle:hover {
+    -fx-background-color: #4a4a6e;
+}
+
+/* Chart legend */
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart-legend-item-text {
+    -fx-fill: #e0e0e0;
+}
+
+/* Button text color */
+.button {
+    -fx-text-fill: #e0e0e0;
+}
+
+.button:hover {
+    -fx-text-fill: #ffffff;
+}
