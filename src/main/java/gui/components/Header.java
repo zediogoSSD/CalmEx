@@ -18,7 +18,7 @@ public class Header extends HBox {
         this.onThemeToggle = onThemeToggle;
         this.setAlignment(Pos.CENTER_LEFT);
         this.setPadding(new Insets(10, 20, 10, 20));
-        this.getStyleClass().add("header-bar");
+        this.getStyleClass().add("caixinhas");
 
         initComponents();
     }
