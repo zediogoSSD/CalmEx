@@ -88,11 +88,11 @@ public class MainWindow {
 
     private void refreshData() {
         LocalDate currentWeek = navComponent.getCurrentDate();
-        Map<String, Integer> data = Relatorios.getTempoPorDia(); // Global fetch
+        Map<String, Integer> data = Relatorios.getTempoPorDia(currentWeek); // Global fetch
 
         // Propagate data to components
         chartComponent.updateData(currentWeek, data);
-        appListComponent.refresh();
+        appListComponent.refresh(currentWeek);
         goalComponent.updateProgress(data);
     }
 }

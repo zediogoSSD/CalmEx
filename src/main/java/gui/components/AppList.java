@@ -12,6 +12,7 @@ import backend.Relatorios;
 import utils.IconUtils;
 import utils.TimeUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class AppList extends VBox {
@@ -32,11 +33,16 @@ public class AppList extends VBox {
     }
 
     public void refresh() {
+        LocalDate weekStart = LocalDate.now().with(java.time.DayOfWeek.MONDAY);
+        refresh(weekStart);
+    }
+
+    public void refresh(LocalDate currentWeek) {
         listView.getItems().clear();
-        List<Relatorios.DadosApp> topApps = Relatorios.DadosApp.getTopApps();
+        List<Relatorios.DadosApp> topApps = Relatorios.DadosApp.getTopApps(currentWeek);
 
         if (topApps == null || topApps.isEmpty()) {
-            listView.getItems().add(new HBox(new Label("Sem dados hoje...")));
+            listView.getItems().add(new HBox(new Label("Sem dados nessa semana...")));
             return;
         }
 
