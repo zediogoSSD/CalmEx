@@ -23,16 +23,16 @@
 
 /* A parte cheia da barra */
 .progress-bar .bar {
-    -fx-background-color: #435fc4; 
+    -fx-background-color: #435fc4;
     -fx-background-radius: 10;     /* Bordas redondas */
     -fx-padding: 4px;              /* Um pouco mais grossa */
 }
 
 /* Muda a cor de preenchimento de TODAS as barras para azul */
 .chart-bar {
-    /* Este código hex (#0078D7) é um azul padrão bonito.
-       Podes trocar por "blue" ou outro código se quiseres um tom diferente. */
-    -fx-bar-fill: #0078D7; 
+    /* Este cÃ³digo hex (#0078D7) Ã© um azul padrÃ£o bonito.
+       Podes trocar por "blue" ou outro cÃ³digo se quiseres um tom diferente. */
+    -fx-bar-fill: #0078D7;
     /* Opcional: Adiciona uma borda subtil para definir melhor as barras */
     -fx-border-color: derive(#0078D7, -20%); /* Um tom mais escuro do mesmo azul */
     -fx-border-width: 1px;
@@ -43,30 +43,30 @@
     -fx-bar-fill: #005a9e; /* Um azul ligeiramente mais escuro para dar efeito */
 }
 
-/* Retira a cor de fundo da área do gráfico para ficar limpo */
+/* Retira a cor de fundo da Ã¡rea do grÃ¡fico para ficar limpo */
 .chart-plot-background {
     -fx-background-color: transparent;
 }
 
 .linha-media {
     -fx-stroke: red;
-    -fx-stroke-width: 2px; 
+    -fx-stroke-width: 2px;
     -fx-stroke-dash-array: 10 5;
 }
 
 .caixa-media-flutuante {
     /* Fundo branco ligeiramente transparente */
     -fx-background-color: rgba(255, 255, 255, 0.85);
-    
+
     /* Bordas arredondadas e subtis */
     -fx-background-radius: 5;
     -fx-border-color: #dddddd;
     -fx-border-radius: 5;
-    
-    /* Espaçamento interno (Cima, Direita, Baixo, Esquerda) */
+
+    /* EspaÃ§amento interno (Cima, Direita, Baixo, Esquerda) */
     -fx-padding: 6 10 6 10;
-    
-    /* Sombra suave para destacar do gráfico */
+
+    /* Sombra suave para destacar do grÃ¡fico */
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);
 }
 
@@ -79,9 +79,9 @@
 /*BOTES*/
 .botao-grande {
     -fx-font-size: 14px;       /* Letra maior */
-    -fx-padding: 10 20 10 20;  /* Espaço à volta do texto (Cima, Direita, Baixo, Esquerda) */
+    -fx-padding: 10 20 10 20;  /* EspaÃ§o Ã  volta do texto (Cima, Direita, Baixo, Esquerda) */
     -fx-background-radius: 5;  /* Cantos arredondados */
-    -fx-cursor: hand;          /* Mãozinha quando passas o rato */
+    -fx-cursor: hand;          /* MÃ£ozinha quando passas o rato */
 }
 
 /* Opcional: Efeito quando passas o rato */
@@ -96,16 +96,16 @@
 .list-view {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
-    -fx-padding: 0; /* Remove o espaço entre a lista e a caixa */
+    -fx-padding: 0; /* Remove o espaÃ§o entre a lista e a caixa */
 }
 
-/* 2. Esconde as células vazias (aquelas linhas "fantasmas" em baixo) */
+/* 2. Esconde as cÃ©lulas vazias (aquelas linhas "fantasmas" em baixo) */
 .list-cell:empty {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
 
-/* 3. Estilo das células que têm conteúdo */
+/* 3. Estilo das cÃ©lulas que tÃªm conteÃºdo */
 .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 5 0 5 0; /* Um pouco de ar entre cada app */
@@ -113,7 +113,7 @@
     -fx-border-width: 0 0 1 0;
 }
 
-/* 4. Remove a cor azul padrão quando clicas numa app (opcional, fica mais limpo) */
+/* 4. Remove a cor azul padrÃ£o quando clicas numa app (opcional, fica mais limpo) */
 .list-cell:filled:selected:focused, .list-cell:filled:selected {
     -fx-background-color: #f0f0f0; /* Um cinzento muito suave em vez de azul */
     -fx-text-fill: black;
@@ -144,5 +144,20 @@
 }
 
 .dark-mode-toggle:hover {
+    -fx-background-color: #e5e7eb;
+}
+
+/* Edit button styling */
+.edit-button {
+    -fx-font-size: 12px;
+    -fx-padding: 2 5 2 5;
+    -fx-background-radius: 20;
+    -fx-background-color: #f4f6f8;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 20;
+    -fx-cursor: hand;
+}
+
+.edit-button:hover {
     -fx-background-color: #e5e7eb;
 }

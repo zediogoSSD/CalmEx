@@ -172,8 +172,32 @@
 /* Button text color */
 .button {
     -fx-text-fill: #e0e0e0;
+    -fx-background-color: #3a3a4e;
 }
 
 .button:hover {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #4a4a6e;
+}
+
+/* Make sure ALL buttons have proper text color */
+.button .text {
+    -fx-fill: #e0e0e0;
+}
+
+/* Edit button styling */
+.edit-button {
+    -fx-font-size: 12px;
+    -fx-padding: 2 5 2 5;
+    -fx-background-radius: 20;
+    -fx-background-color: #3a3a4e;
+    -fx-border-color: #4a4a6e;
+    -fx-border-radius: 20;
+    -fx-cursor: hand;
+    -fx-text-fill: #e0e0e0;
+}
+
+.edit-button:hover {
+    -fx-background-color: #4a4a6e;
     -fx-text-fill: #ffffff;
 }

@@ -42,7 +42,7 @@ public class Header extends HBox {
 
     private void toggleTheme() {
         isDarkMode = !isDarkMode;
-        btnDarkMode.setText(isDarkMode ? "☀️" : "🌙");
+        btnDarkMode.setText(isDarkMode ? "🌞" : "🌙");
         onThemeToggle.run();
     }
 

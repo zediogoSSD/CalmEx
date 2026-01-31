@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import utils.ConfigUtils;
 import utils.TimeUtils;
+import javafx.scene.layout.Priority;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class DailyGoal extends VBox {
         title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
         Button editBtn = new Button("Editar ✎");
-        editBtn.setStyle("-fx-font-size: 12px; -fx-padding: 2 5 2 5; -fx-background-radius: 20;");
+        editBtn.getStyleClass().add("edit-button");
         editBtn.setOnAction(e -> openEditDialog());
 
         HBox header = new HBox(10, title);
@@ -40,6 +41,7 @@ public class DailyGoal extends VBox {
 
         progressBar = new ProgressBar(0);
         progressBar.setPrefWidth(Double.MAX_VALUE);
+        HBox.setHgrow(progressBar, Priority.ALWAYS);
         progressBar.setPrefHeight(20);
 
         detailLabel = new Label();
