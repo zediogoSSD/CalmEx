@@ -45,6 +45,7 @@ public class WeeklyChart extends VBox {
         barChart = new BarChart<>(xAxis, yAxis);
         barChart.setTitle("Relatório Semanal");
         barChart.setAnimated(false);
+        barChart.getStyleClass().add("weekly-bar-chart");
 
         series = new XYChart.Series<>();
         series.setName("Horas Trabalhadas");
@@ -69,7 +70,7 @@ public class WeeklyChart extends VBox {
 
     private void setupAverageLine() {
         averageLine = new Line();
-        averageLine.setStyle("-fx-stroke: red; -fx-stroke-width: 3px;");
+        averageLine.getStyleClass().add("linha-media");
         averageLine.setManaged(false);
         averageLine.setVisible(false);
     }

@@ -20,7 +20,7 @@ import java.util.List;
 
 public class HistoryDialog {
 
-    public static void show(Stage owner, LocalDate date) {
+    public static void show(Stage owner, LocalDate date, boolean isDarkMode) {
         Stage stage = new Stage();
         stage.initOwner(owner);
         stage.initModality(Modality.WINDOW_MODAL);
@@ -31,10 +31,10 @@ public class HistoryDialog {
         layout.getStyleClass().add("caixinhas");
 
         Label header = new Label("Histórico: " + date.toString());
-        header.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: black;");
+        header.getStyleClass().add("header-title");
 
         ListView<HBox> list = new ListView<>();
-        list.setStyle("-fx-background-color: transparent; -fx-control-inner-background: transparent; -fx-padding: 0;");
+        list.getStyleClass().add("list-view");
         VBox.setVgrow(list, Priority.ALWAYS);
 
         List<Relatorios.LogItem> items = Relatorios.LogItem.getHistorico(date.toString());
@@ -43,7 +43,7 @@ public class HistoryDialog {
             Label timeLbl = new Label(item.hora);
             timeLbl.setPrefWidth(60);
             timeLbl.setAlignment(Pos.CENTER_RIGHT);
-            timeLbl.setStyle("-fx-text-fill: #333333; -fx-font-size: 13px;");
+            timeLbl.getStyleClass().add("texto-media");
 
             ImageView iconView = new ImageView();
             var icon = IconUtils.carregarIcone(item.caminho);
@@ -58,12 +58,12 @@ public class HistoryDialog {
 
             Label nameLbl = new Label(item.nome);
             HBox.setHgrow(nameLbl, Priority.ALWAYS);
-            nameLbl.setStyle("-fx-text-fill: #333333; -fx-font-size: 14px;");
+            nameLbl.getStyleClass().add("label");
 
             HBox row = new HBox(10, timeLbl, iconBox, nameLbl);
             row.setAlignment(Pos.CENTER_LEFT);
             row.setPadding(new Insets(8, 5, 8, 5));
-            row.setStyle("-fx-border-color: #707070ff; -fx-border-width: 0 0 1 0;");
+            row.getStyleClass().add("list-cell");
 
             list.getItems().add(row);
         }
@@ -72,7 +72,8 @@ public class HistoryDialog {
         Scene scene = new Scene(layout, 700, 550);
 
         try {
-            String css = Objects.requireNonNull(HistoryDialog.class.getResource("/estilo.css")).toExternalForm();
+            String cssFile = isDarkMode ? "/estiloDark.css" : "/estilo.css";
+            String css = Objects.requireNonNull(HistoryDialog.class.getResource(cssFile)).toExternalForm();
             scene.getStylesheets().add(css);
         } catch (Exception e) {
             System.out.println("Could not load CSS: " + e.getMessage());

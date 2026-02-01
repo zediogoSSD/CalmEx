@@ -15,35 +15,27 @@
 
 }
 
-/* Fundo da barra (o caminho vazio) */
 .progress-bar .track {
-    -fx-background-color: #d2d2d2; /* Cinzento claro */
-    -fx-background-radius: 10;     /* Bordas redondas */
+    -fx-background-color: #d2d2d2;
+    -fx-background-radius: 10;
 }
 
-/* A parte cheia da barra */
 .progress-bar .bar {
     -fx-background-color: #435fc4;
-    -fx-background-radius: 10;     /* Bordas redondas */
-    -fx-padding: 4px;              /* Um pouco mais grossa */
+    -fx-background-radius: 10;
+    -fx-padding: 4px;
 }
 
-/* Muda a cor de preenchimento de TODAS as barras para azul */
 .chart-bar {
-    /* Este cÃ³digo hex (#0078D7) Ã© um azul padrÃ£o bonito.
-       Podes trocar por "blue" ou outro cÃ³digo se quiseres um tom diferente. */
     -fx-bar-fill: #0078D7;
-    /* Opcional: Adiciona uma borda subtil para definir melhor as barras */
     -fx-border-color: derive(#0078D7, -20%); /* Um tom mais escuro do mesmo azul */
     -fx-border-width: 1px;
 }
 
-/* (Opcional) Muda a cor quando passas o rato por cima da barra */
 .chart-bar:hover {
-    -fx-bar-fill: #005a9e; /* Um azul ligeiramente mais escuro para dar efeito */
+    -fx-bar-fill: #005a9e;
 }
 
-/* Retira a cor de fundo da Ã¡rea do grÃ¡fico para ficar limpo */
 .chart-plot-background {
     -fx-background-color: transparent;
 }
@@ -55,18 +47,14 @@
 }
 
 .caixa-media-flutuante {
-    /* Fundo branco ligeiramente transparente */
     -fx-background-color: rgba(255, 255, 255, 0.85);
 
-    /* Bordas arredondadas e subtis */
     -fx-background-radius: 5;
     -fx-border-color: #dddddd;
     -fx-border-radius: 5;
 
-    /* EspaÃ§amento interno (Cima, Direita, Baixo, Esquerda) */
     -fx-padding: 6 10 6 10;
 
-    /* Sombra suave para destacar do grÃ¡fico */
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 3, 0, 0, 1);
 }
 
@@ -84,7 +72,6 @@
     -fx-cursor: hand;          /* MÃ£ozinha quando passas o rato */
 }
 
-/* Opcional: Efeito quando passas o rato */
 .botao-grande:hover {
     -fx-background-color: #e0e0e0; /* Fica ligeiramente mais escuro */
 }
@@ -92,20 +79,17 @@
 
 /*LISTA*/
 
-/* 1. Remove a borda e o fundo cinzento da lista em si */
 .list-view {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
-    -fx-padding: 0; /* Remove o espaÃ§o entre a lista e a caixa */
+    -fx-padding: 0;
 }
 
-/* 2. Esconde as cÃ©lulas vazias (aquelas linhas "fantasmas" em baixo) */
 .list-cell:empty {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
 
-/* 3. Estilo das cÃ©lulas que tÃªm conteÃºdo */
 .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 5 0 5 0; /* Um pouco de ar entre cada app */
@@ -113,9 +97,8 @@
     -fx-border-width: 0 0 1 0;
 }
 
-/* 4. Remove a cor azul padrÃ£o quando clicas numa app (opcional, fica mais limpo) */
 .list-cell:filled:selected:focused, .list-cell:filled:selected {
-    -fx-background-color: #f0f0f0; /* Um cinzento muito suave em vez de azul */
+    -fx-background-color: #f0f0f0;
     -fx-text-fill: black;
 }
 
@@ -160,4 +143,20 @@
 
 .edit-button:hover {
     -fx-background-color: #e5e7eb;
+}
+
+.axis {
+    -fx-tick-label-fill: #333333; /* Color of the numbers/days */
+}
+
+.axis-label {
+    -fx-text-fill: #333333; /* Color of "Dias" and "Horas" */
+}
+
+.axis-tick-mark {
+    -fx-stroke: #d1d5db; /* Color of the small tick lines */
+}
+
+.axis-axis-line {
+    -fx-stroke: #d1d5db; /* Color of the main axis lines */
 }

@@ -39,7 +39,7 @@ public class MainWindow {
         // Navigation needs callbacks
         navComponent = new Navigation(
                 this::refreshData, // Called when date changes
-                () -> HistoryDialog.show(stage, LocalDate.now()) // Called when details clicked
+                () -> HistoryDialog.show(stage, LocalDate.now(), headerComponent.isDarkMode()) // Called when details clicked
         );
 
         // 2. Build Layout (Top Grid)
@@ -77,7 +77,7 @@ public class MainWindow {
 
         Scene scene = new Scene(mainLayout, 1000, 680);
 
-        stage.setTitle("Time Tracker");
+        stage.setTitle("CalmEx");
         stage.setScene(scene);
 
         loadCSS(false);

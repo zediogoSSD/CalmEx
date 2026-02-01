@@ -16,7 +16,6 @@ public class Header extends HBox {
 
     public Header(Runnable onThemeToggle) {
         this.onThemeToggle = onThemeToggle;
-        this.setAlignment(Pos.CENTER_LEFT);
         this.setPadding(new Insets(10, 20, 10, 20));
         this.getStyleClass().add("caixinhas");
 
