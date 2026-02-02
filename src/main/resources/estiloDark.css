@@ -222,3 +222,40 @@
 .chart-horizontal-grid-lines {
     -fx-stroke: #3a3a4e;
 }
+
+/* --- SCROLL BAR DARK MODE --- */
+
+.list-view .scroll-bar:vertical,
+.list-view .scroll-bar:horizontal {
+    -fx-background-color: #2a2a3e; /* Matches your .caixinhas background */
+}
+
+/* The draggable part of the bar */
+.list-view .scroll-bar .thumb {
+    -fx-background-color: #4a4a6e; /* Matches your hover states */
+    -fx-background-insets: 2;
+    -fx-background-radius: 10;
+}
+
+.list-view .scroll-bar .thumb:hover {
+    -fx-background-color: #5b7fd4; /* Matches your progress bar blue */
+}
+
+/* The track (the path the thumb slides on) */
+.list-view .scroll-bar .track {
+    -fx-background-color: #1e1e2e; /* Matches your root background */
+    -fx-background-radius: 10;
+}
+
+/* The increment/decrement buttons (the arrows) */
+.list-view .scroll-bar .increment-button,
+.list-view .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 5 0 5;
+}
+
+.list-view .scroll-bar .increment-arrow,
+.list-view .scroll-bar .decrement-arrow {
+    -fx-shape: " "; /* This hides the default ugly arrows for a cleaner look */
+    -fx-padding: 0;
+}

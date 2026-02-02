@@ -160,3 +160,37 @@
 .axis-axis-line {
     -fx-stroke: #d1d5db; /* Color of the main axis lines */
 }
+.list-view .scroll-bar:vertical,
+.list-view .scroll-bar:horizontal {
+    -fx-background-color: #ffffff; /* Matches your .caixinhas background */
+}
+
+/* The draggable part of the bar */
+.list-view .scroll-bar .thumb {
+    -fx-background-color: #e0e0e0; /* Matches your hover states */
+    -fx-background-insets: 2;
+    -fx-background-radius: 10;
+}
+
+.list-view .scroll-bar .thumb:hover {
+    -fx-background-color: #555555; /* Matches your progress bar blue */
+}
+
+/* The track (the path the thumb slides on) */
+.list-view .scroll-bar .track {
+    -fx-background-color: #f4f6f8; /* Matches your root background */
+    -fx-background-radius: 10;
+}
+
+/* The increment/decrement buttons (the arrows) */
+.list-view .scroll-bar .increment-button,
+.list-view .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 5 0 5;
+}
+
+.list-view .scroll-bar .increment-arrow,
+.list-view .scroll-bar .decrement-arrow {
+    -fx-shape: " "; /* This hides the default ugly arrows for a cleaner look */
+    -fx-padding: 0;
+}

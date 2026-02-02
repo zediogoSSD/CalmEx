@@ -24,7 +24,6 @@ import java.util.Objects;
 
 public class HistoryDialog {
 
-    // Cache to store icons so they aren't reloaded during scrolling
     private static final Map<String, Image> iconCache = new HashMap<>();
 
     public static void show(Stage owner, LocalDate date, boolean isDarkMode) {
