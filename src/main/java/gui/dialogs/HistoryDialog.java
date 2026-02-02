@@ -4,7 +4,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -13,12 +15,17 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import backend.Relatorios;
 import utils.IconUtils;
-import java.util.Objects;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class HistoryDialog {
+
+    // Cache to store icons so they aren't reloaded during scrolling
+    private static final Map<String, Image> iconCache = new HashMap<>();
 
     public static void show(Stage owner, LocalDate date, boolean isDarkMode) {
         Stage stage = new Stage();
@@ -33,40 +40,17 @@ public class HistoryDialog {
         Label header = new Label("Histórico: " + date.toString());
         header.getStyleClass().add("header-title");
 
-        ListView<HBox> list = new ListView<>();
+        // Updated ListView to use the Data Model (LogItem) instead of HBox
+        ListView<Relatorios.LogItem> list = new ListView<>();
         list.getStyleClass().add("list-view");
         VBox.setVgrow(list, Priority.ALWAYS);
 
+        // Set the Cell Factory for Lazy Loading
+        list.setCellFactory(param -> new LogCell());
+
+        // Load data and add directly to the list
         List<Relatorios.LogItem> items = Relatorios.LogItem.getHistorico(date.toString());
-
-        for (Relatorios.LogItem item : items) {
-            Label timeLbl = new Label(item.hora);
-            timeLbl.setPrefWidth(60);
-            timeLbl.setAlignment(Pos.CENTER_RIGHT);
-            timeLbl.getStyleClass().add("texto-media");
-
-            ImageView iconView = new ImageView();
-            var icon = IconUtils.carregarIcone(item.caminho);
-            if (icon != null) {
-                iconView.setImage(icon);
-                iconView.setFitWidth(18);
-                iconView.setFitHeight(18);
-            }
-            HBox iconBox = new HBox(iconView);
-            iconBox.setPrefWidth(30);
-            iconBox.setAlignment(Pos.CENTER);
-
-            Label nameLbl = new Label(item.nome);
-            HBox.setHgrow(nameLbl, Priority.ALWAYS);
-            nameLbl.getStyleClass().add("label");
-
-            HBox row = new HBox(10, timeLbl, iconBox, nameLbl);
-            row.setAlignment(Pos.CENTER_LEFT);
-            row.setPadding(new Insets(8, 5, 8, 5));
-            row.getStyleClass().add("list-cell");
-
-            list.getItems().add(row);
-        }
+        list.getItems().addAll(items);
 
         layout.getChildren().addAll(header, list);
         Scene scene = new Scene(layout, 700, 550);
@@ -81,5 +65,55 @@ public class HistoryDialog {
 
         stage.setScene(scene);
         stage.show();
+    }
+
+    /**
+     * Custom Cell Class that reuses UI components
+     */
+    private static class LogCell extends ListCell<Relatorios.LogItem> {
+        private final HBox row;
+        private final Label timeLbl = new Label();
+        private final ImageView iconView = new ImageView();
+        private final Label nameLbl = new Label();
+
+        public LogCell() {
+            timeLbl.setPrefWidth(60);
+            timeLbl.setAlignment(Pos.CENTER_RIGHT);
+            timeLbl.getStyleClass().add("texto-media");
+
+            iconView.setFitWidth(18);
+            iconView.setFitHeight(18);
+
+            HBox iconBox = new HBox(iconView);
+            iconBox.setPrefWidth(30);
+            iconBox.setAlignment(Pos.CENTER);
+
+            HBox.setHgrow(nameLbl, Priority.ALWAYS);
+            nameLbl.getStyleClass().add("label");
+
+            row = new HBox(10, timeLbl, iconBox, nameLbl);
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.setPadding(new Insets(8, 5, 8, 5));
+            row.getStyleClass().add("list-cell");
+        }
+
+        @Override
+        protected void updateItem(Relatorios.LogItem item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty || item == null) {
+                setGraphic(null);
+                setText(null);
+            } else {
+                timeLbl.setText(item.hora);
+                nameLbl.setText(item.nome);
+
+                // Use the cache for the icon
+                Image icon = iconCache.computeIfAbsent(item.caminho, path -> IconUtils.carregarIcone(path));
+                iconView.setImage(icon);
+
+                setGraphic(row);
+            }
+        }
     }
 }

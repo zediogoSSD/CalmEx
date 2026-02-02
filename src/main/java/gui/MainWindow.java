@@ -30,16 +30,15 @@ public class MainWindow {
         mainLayout.setPadding(new Insets(20));
 
         headerComponent = new Header(this::toggleTheme);
+        VBox.setMargin(headerComponent, new Insets(20, 0, 0, 0));
 
-        // 1. Initialize Components
         chartComponent = new WeeklyChart();
         appListComponent = new AppList();
         goalComponent = new DailyGoal();
 
-        // Navigation needs callbacks
         navComponent = new Navigation(
-                this::refreshData, // Called when date changes
-                () -> HistoryDialog.show(stage, LocalDate.now(), headerComponent.isDarkMode()) // Called when details clicked
+                this::refreshData,
+                () -> HistoryDialog.show(stage, LocalDate.now(), headerComponent.isDarkMode())
         );
 
         // 2. Build Layout (Top Grid)

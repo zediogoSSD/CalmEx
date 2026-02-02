@@ -18,12 +18,12 @@ public class Header extends HBox {
         this.onThemeToggle = onThemeToggle;
         this.setPadding(new Insets(10, 20, 10, 20));
         this.getStyleClass().add("caixinhas");
+        this.setAlignment(Pos.CENTER_LEFT);
 
         initComponents();
     }
 
     private void initComponents() {
-        // Title on the left
         Text title = new Text("CalmEx");
         title.getStyleClass().add("header-title");
 
