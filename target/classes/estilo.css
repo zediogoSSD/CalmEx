@@ -101,8 +101,8 @@
     -fx-background-color: #d0d0d0;
 }
 
-.text {
-    -fx-fill: #333333;
+.list-cell:filled:selected .label {
+    -fx-text-fill: #333333;
 }
 
 /* Header styles */
