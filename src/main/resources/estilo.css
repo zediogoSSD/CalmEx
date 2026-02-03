@@ -98,8 +98,11 @@
 }
 
 .list-cell:filled:selected:focused, .list-cell:filled:selected {
-    -fx-background-color: #f0f0f0;
-    -fx-text-fill: #000000;
+    -fx-background-color: #d0d0d0;
+}
+
+.text {
+    -fx-fill: #333333;
 }
 
 /* Header styles */

@@ -22,6 +22,7 @@ public class AppList extends VBox {
     public AppList() {
         Label title = new Label("Apps mais usadas");
         listView = new ListView<>();
+        listView.getStyleClass().add("list-cell:filled:selected");
         listView.setStyle("-fx-background-insets: 0; -fx-padding: 0;");
 
         this.setSpacing(10);
