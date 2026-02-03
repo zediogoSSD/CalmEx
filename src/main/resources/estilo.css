@@ -197,3 +197,7 @@
     -fx-shape: " "; /* This hides the default ugly arrows for a cleaner look */
     -fx-padding: 0;
 }
+
+.progress-bar:finished .bar {
+    -fx-background-color: green;
+}

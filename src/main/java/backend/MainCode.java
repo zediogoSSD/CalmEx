@@ -60,7 +60,7 @@ public class MainCode {
             int timeParadoMili = atividadeLigado - info.dwTime;
 
             int timeParadoSegundos = timeParadoMili/1000;
-            if(timeParadoSegundos >= 60) {
+            if(timeParadoSegundos >= 900) {
                 System.out.println("Estás AFK há: " + timeParadoSegundos + " segundos.");
             } else {
                 System.out.println("A trabalhar em: " + Native.toString(guardiaoTexto));

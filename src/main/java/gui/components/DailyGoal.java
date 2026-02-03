@@ -1,5 +1,6 @@
 package gui.components;
 
+import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -59,16 +60,15 @@ public class DailyGoal extends VBox {
         if (data == null) return;
 
         String todayKey = LocalDate.now().toString();
-        int secondsDone = data != null ? data.getOrDefault(todayKey, 0) : 0;
+        int secondsDone = data.getOrDefault(todayKey, 0);
 
         int targetSeconds = goalHours.get() * 3600;
-        double progress = (double) secondsDone / targetSeconds;
+        double progress = (targetSeconds > 0) ? (double) secondsDone / targetSeconds : 0;
 
         progressBar.setProgress(Math.min(progress, 1.0));
         detailLabel.setText(TimeUtils.formatarTempo(secondsDone) + " / " + goalHours.get() + "h");
 
-        if (progress >= 1.0) progressBar.setStyle("-fx-accent: green;");
-        else progressBar.setStyle(null);
+        progressBar.pseudoClassStateChanged(PseudoClass.getPseudoClass("finished"), progress >= 1);
     }
 
     private void openEditDialog() {
