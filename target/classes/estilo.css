@@ -99,7 +99,7 @@
 
 .list-cell:filled:selected:focused, .list-cell:filled:selected {
     -fx-background-color: #f0f0f0;
-    -fx-text-fill: black;
+    -fx-text-fill: #000000;
 }
 
 /* Header styles */

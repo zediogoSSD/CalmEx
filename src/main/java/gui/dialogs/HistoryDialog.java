@@ -17,10 +17,8 @@ import backend.Relatorios;
 import utils.IconUtils;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class HistoryDialog {
 
@@ -36,7 +34,10 @@ public class HistoryDialog {
         layout.setPadding(new Insets(20));
         layout.getStyleClass().add("caixinhas");
 
-        Label header = new Label("Histórico: " + date.toString());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String formattedDate = date.format(formatter);
+
+        Label header = new Label("Histórico: " + formattedDate);
         header.getStyleClass().add("header-title");
 
         // Updated ListView to use the Data Model (LogItem) instead of HBox
