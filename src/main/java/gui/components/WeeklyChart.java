@@ -88,7 +88,7 @@ public class WeeklyChart extends VBox {
         box.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         StackPane.setAlignment(box, Pos.TOP_RIGHT);
-        StackPane.setMargin(box, new Insets(5, 15, 0, 0));
+        StackPane.setMargin(box, new Insets(1, 15, 0, 0));
         return box;
     }
 

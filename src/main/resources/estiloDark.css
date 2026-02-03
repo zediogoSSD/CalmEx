@@ -270,3 +270,24 @@
 .progress-bar:finished .bar {
     -fx-background-color: green;
 }
+
+.text-field {
+    -fx-background-color: #1e1e2e;
+    -fx-border-color: #4a4a6e;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 8;
+    -fx-font-size: 14px;
+    -fx-text-fill: #e0e0e0;
+}
+
+.text-field:focused {
+    -fx-border-color: #5b7fd4;
+    -fx-border-width: 2;
+    -fx-background-color: #2a2a3e;
+}
+
+/* Ensure text input cursor is visible */
+.text-field .text {
+    -fx-fill: #e0e0e0;
+}

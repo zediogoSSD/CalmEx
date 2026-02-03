@@ -50,7 +50,7 @@
     -fx-background-color: rgba(255, 255, 255, 0.85);
 
     -fx-background-radius: 5;
-    -fx-border-color: #dddddd;
+    -fx-border-color: #ececec;
     -fx-border-radius: 5;
 
     -fx-padding: 6 10 6 10;
@@ -200,4 +200,26 @@
 
 .progress-bar:finished .bar {
     -fx-background-color: green;
+}
+
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 8;
+    -fx-font-size: 14px;
+}
+
+.text-field:focused {
+    -fx-border-color: #435fc4;
+    -fx-border-width: 2;
+    -fx-background-color: #ffffff;
+}
+
+.botao-medio {
+    -fx-font-size: 13px;       /* Letra maior */
+    -fx-padding: 10 15 10 15;  /* EspaÃ§o Ã  volta do texto (Cima, Direita, Baixo, Esquerda) */
+    -fx-background-radius: 5;  /* Cantos arredondados */
+    -fx-cursor: hand;          /* MÃ£ozinha quando passas o rato */
 }
