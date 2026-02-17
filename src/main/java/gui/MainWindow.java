@@ -10,7 +10,8 @@ import backend.Relatorios;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
-
+import java.time.DayOfWeek;
+import java.time.temporal.TemporalAdjusters;
 
 public class MainWindow {
 
@@ -20,6 +21,9 @@ public class MainWindow {
     private DailyGoal goalComponent;
     private Navigation navComponent;
     private Header headerComponent;
+
+    //We save the current week's data here so the click listener can use it
+    private Map<String, Integer> currentData;
 
     public MainWindow(Stage stage) {
         this.stage = stage;
@@ -35,6 +39,14 @@ public class MainWindow {
         chartComponent = new WeeklyChart();
         appListComponent = new AppList();
         goalComponent = new DailyGoal();
+
+        //Tell the chart what to do when a bar is clicked
+        chartComponent.setOnDaySelectedListener(clickedDate -> {
+            if (currentData != null) {
+                // Updates the Daily Goal to show the specific clicked day
+                goalComponent.setDateAndUpdate(clickedDate, currentData);
+            }
+        });
 
         navComponent = new Navigation(
                 this::refreshData,
@@ -107,12 +119,41 @@ public class MainWindow {
     }
 
     private void refreshData() {
-        LocalDate currentWeek = navComponent.getCurrentDate();
-        Map<String, Integer> data = Relatorios.getTempoPorDia(currentWeek); // Global fetch
+        LocalDate currentMonday = navComponent.getCurrentDate();
 
-        // Propagate data to components
-        chartComponent.updateData(currentWeek, data);
-        appListComponent.refresh(currentWeek);
-        goalComponent.updateProgress(data);
+        // Guarda os dados na variável da classe
+        currentData = Relatorios.getTempoPorDia(currentMonday);
+
+        // Atualiza os componentes base
+        chartComponent.updateData(currentMonday, currentData);
+        appListComponent.refresh(currentMonday);
+
+        // --- LÓGICA DE SELEÇÃO INTELIGENTE DO DIA ---
+        LocalDate today = LocalDate.now();
+        LocalDate mondayOfThisWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        LocalDate dayToSelect = currentMonday; // Por defeito, escolhe segunda-feira
+
+        if (currentMonday.equals(mondayOfThisWeek)) {
+            // 1. Se estivermos na semana atual, escolhe SEMPRE o dia de hoje
+            dayToSelect = today;
+        } else {
+            // 2. Se for uma semana passada, procura o primeiro dia que tenha tempo registado
+            for (int i = 0; i < 7; i++) {
+                LocalDate checkDate = currentMonday.plusDays(i);
+                int timeLogged = currentData.getOrDefault(checkDate.toString(), 0);
+
+                if (timeLogged > 0) {
+                    dayToSelect = checkDate;
+                    break; // Encontrou o primeiro dia com dados, para a procura!
+                }
+            }
+        }
+
+        // Coloca a borda no gráfico para indicar claramente qual dia foi selecionado automaticamente
+        chartComponent.setSelectedDate(null);
+
+        // Atualiza o painel do Objetivo Diário para mostrar os dados desse dia
+        goalComponent.setDateAndUpdate(dayToSelect, currentData);
     }
 }

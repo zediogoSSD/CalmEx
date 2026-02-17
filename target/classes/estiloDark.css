@@ -291,3 +291,10 @@
 .text-field .text {
     -fx-fill: #e0e0e0;
 }
+
+/* Highlight for the selected day in the chart */
+.chart-bar.chart-bar-selected {
+    -fx-border-color: #ff6b6b;
+    -fx-border-width: 2px;
+    -fx-bar-fill: #6bb0ff; /* Keeps it slightly lighter like the hover state */
+}

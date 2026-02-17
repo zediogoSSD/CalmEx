@@ -223,3 +223,10 @@
     -fx-background-radius: 5;  /* Cantos arredondados */
     -fx-cursor: hand;          /* MÃ£ozinha quando passas o rato */
 }
+
+/* Highlight for the selected day in the chart */
+.chart-bar.chart-bar-selected {
+    -fx-border-color: #ff6b6b;
+    -fx-border-width: 2px;
+    -fx-bar-fill: #005a9e; /* Keeps it slightly darker like the hover state */
+}

@@ -18,6 +18,7 @@ import utils.TimeUtils;
 import javafx.scene.layout.Priority;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,18 +27,23 @@ public class DailyGoal extends VBox {
     private AtomicInteger goalHours;
     private ProgressBar progressBar;
     private Label detailLabel;
+    private Label title;
+    private Button editBtn; // Made class-level so we can hide it
     private Map<String, Integer> latestData;
+    private LocalDate currentDate;
 
     public DailyGoal() {
-        this.goalHours = new AtomicInteger(ConfigUtils.carregarObjetivo());
+        this.currentDate = LocalDate.now();
+        // Load the objective specifically for today
+        this.goalHours = new AtomicInteger(carregarObjetivoParaData(currentDate));
         initUI();
     }
 
     private void initUI() {
-        Label title = new Label("Objetivo Diário");
+        title = new Label("Objetivo Diário");
         title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
 
-        Button editBtn = new Button("Editar ✎");
+        editBtn = new Button("Editar ✎");
         editBtn.getStyleClass().add("edit-button");
         editBtn.setOnAction(e -> openEditDialog());
 
@@ -59,12 +65,33 @@ public class DailyGoal extends VBox {
         this.getChildren().addAll(header, progressBar, footer);
     }
 
-    public void updateProgress(Map<String, Integer> data) {
+    public void setDateAndUpdate(LocalDate date, Map<String, Integer> data) {
+        this.currentDate = date;
         this.latestData = data;
-        if (data == null) return;
 
-        String todayKey = LocalDate.now().toString();
-        int secondsDone = data.getOrDefault(todayKey, 0);
+        // 1. Hide the Edit button if the date is not today
+        boolean isToday = date.equals(LocalDate.now());
+        editBtn.setVisible(isToday);
+
+        // 2. Load the historical objective for this specific date
+        goalHours.set(carregarObjetivoParaData(date));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+        String dateSuffix = isToday ? " (Hoje)" : " (" + date.format(formatter) + ")";
+        title.setText("Objetivo Diário" + dateSuffix);
+
+        refreshProgressUI();
+    }
+
+    public void updateProgress(Map<String, Integer> data) {
+        setDateAndUpdate(this.currentDate, data);
+    }
+
+    private void refreshProgressUI() {
+        if (latestData == null) return;
+
+        String targetKey = currentDate.toString();
+        int secondsDone = latestData.getOrDefault(targetKey, 0);
 
         int targetSeconds = goalHours.get() * 3600;
         double progress = (targetSeconds > 0) ? (double) secondsDone / targetSeconds : 0;
@@ -81,7 +108,6 @@ public class DailyGoal extends VBox {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(this.getScene().getWindow());
 
-        // Create dialog content
         VBox dialogContent = new VBox(15);
         dialogContent.getStyleClass().add("caixinhas");
         dialogContent.setPadding(new Insets(20));
@@ -98,7 +124,6 @@ public class DailyGoal extends VBox {
         inputField.setStyle("-fx-font-size: 14px; -fx-padding: 8;");
         inputField.selectAll();
 
-        // Button container
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
 
@@ -111,19 +136,19 @@ public class DailyGoal extends VBox {
         cancelBtn.setCancelButton(true);
 
         buttonBox.getChildren().addAll(confirmBtn, cancelBtn);
-
         dialogContent.getChildren().addAll(titleLabel, instructionLabel, inputField, buttonBox);
 
-        // Event handlers
         confirmBtn.setOnAction(e -> {
             try {
                 int newVal = Integer.parseInt(inputField.getText().trim());
                 if (newVal > 0 && newVal < 24) {
                     goalHours.set(newVal);
-                    ConfigUtils.salvarObjetivo(newVal);
+
+                    // Salva o objetivo atrelado à data de hoje
+                    salvarObjetivoParaData(currentDate, newVal);
 
                     if (latestData != null) {
-                        updateProgress(latestData);
+                        refreshProgressUI();
                     }
                     dialog.close();
                 } else {
@@ -135,21 +160,14 @@ public class DailyGoal extends VBox {
         });
 
         cancelBtn.setOnAction(e -> dialog.close());
-
-        // Allow Enter to confirm
         inputField.setOnAction(e -> confirmBtn.fire());
 
-        // Create scene and apply the same stylesheet as the main application
         Scene dialogScene = new Scene(dialogContent);
-
-        // Apply the current stylesheet (light or dark mode)
         if (this.getScene() != null && this.getScene().getStylesheets() != null) {
             dialogScene.getStylesheets().addAll(this.getScene().getStylesheets());
         }
 
         dialog.setScene(dialogScene);
-
-        // Center on parent window
         dialog.setOnShown(e -> {
             dialog.setX(this.getScene().getWindow().getX() +
                     (this.getScene().getWindow().getWidth() - dialog.getWidth()) / 2);
@@ -159,5 +177,13 @@ public class DailyGoal extends VBox {
 
         inputField.requestFocus();
         dialog.showAndWait();
+    }
+
+    private int carregarObjetivoParaData(LocalDate date) {
+        return ConfigUtils.carregarObjetivo(date.toString());
+    }
+
+    private void salvarObjetivoParaData(LocalDate date, int horas) {
+        ConfigUtils.salvarObjetivo(date.toString(), horas);
     }
 }

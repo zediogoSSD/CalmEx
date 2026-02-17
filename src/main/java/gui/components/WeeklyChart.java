@@ -15,6 +15,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import utils.TimeUtils;
 
+import java.util.function.Consumer;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -29,8 +30,15 @@ public class WeeklyChart extends VBox {
     private Label averageLabel;
     private double currentAverageValue;
 
+    private Consumer<LocalDate> onDaySelectedListener;
+    private LocalDate currentlySelectedDate = LocalDate.now();
+
     public WeeklyChart() {
         initUI();
+    }
+
+    public void setOnDaySelectedListener(Consumer<LocalDate> listener) {
+        this.onDaySelectedListener = listener;
     }
 
     private void initUI() {
@@ -92,6 +100,11 @@ public class WeeklyChart extends VBox {
         return box;
     }
 
+    public void setSelectedDate(LocalDate date) {
+        this.currentlySelectedDate = date;
+        highlightSelectedBar();
+    }
+
     public void updateData(LocalDate currentWeek, Map<String, Integer> data) {
         series.getData().clear();
         double totalSeconds = 0;
@@ -104,8 +117,11 @@ public class WeeklyChart extends VBox {
 
             String dayName = day.getDayOfWeek().getDisplayName(TextStyle.SHORT, new Locale("pt", "PT"));
             XYChart.Data<String, Number> dataPoint = new XYChart.Data<>(dayName, hours);
-            series.getData().add(dataPoint);
 
+            // Store the LocalDate inside the data point so we can retrieve it on click
+            dataPoint.setExtraValue(day);
+
+            series.getData().add(dataPoint);
 
             totalSeconds += seconds;
             if (hours > maxHours) maxHours = hours;
@@ -120,19 +136,69 @@ public class WeeklyChart extends VBox {
         updateAverageLinePosition();
 
         for (XYChart.Data<String, Number> dados : series.getData()) {
-            // 1. Calcular o tempo bonito (ex: "1h 30m")
             double horas = dados.getYValue().doubleValue();
-            int segundos = (int) (horas * 3600); // Converter de volta para segundos
+            int segundos = (int) (horas * 3600);
             String textoTooltip = TimeUtils.formatarTempo(segundos);
 
-            //Criar o balao com o tempo
             Tooltip tooltip = new Tooltip(textoTooltip);
-            tooltip.setStyle("-fx-font-size: 14px;"); // Letra maiorzinha
-            tooltip.setShowDelay(javafx.util.Duration.millis(100)); // Aparece quase instantaneamente
+            tooltip.setStyle("-fx-font-size: 14px;");
+            tooltip.setShowDelay(javafx.util.Duration.millis(100));
 
-            // 3. Colar na barra (Node)
-            // Nota: O 'Node' é a barra azul visual
-            Tooltip.install(dados.getNode(), tooltip);
+            // Make sure the Node is generated before we attach events
+            Node barNode = dados.getNode();
+            if (barNode != null) {
+                Tooltip.install(barNode, tooltip);
+
+                // Add the Hand Cursor to indicate it's clickable
+                barNode.setStyle("-fx-cursor: hand;");
+
+                // Add the Click Event
+                barNode.setOnMouseClicked(event -> {
+                    if (onDaySelectedListener != null) {
+                        LocalDate clickedDate = (LocalDate) dados.getExtraValue();
+                        onDaySelectedListener.accept(clickedDate);
+                    }
+                });
+            }
+        }
+
+        if (barChart == null || averageLine == null) return;
+
+        Platform.runLater(() -> {
+            Node plotArea = barChart.lookup(".chart-plot-background");
+            if (plotArea != null && barChart.getHeight() > 0) {
+                double pixelY = yAxis.getDisplayPosition(currentAverageValue);
+                double plotTop = plotArea.getBoundsInParent().getMinY();
+                double plotLeft = plotArea.getBoundsInParent().getMinX();
+                double plotWidth = plotArea.getBoundsInParent().getWidth();
+
+                double finalY = plotTop + pixelY;
+
+                averageLine.setStartY(finalY);
+                averageLine.setEndY(finalY);
+                averageLine.setStartX(plotLeft);
+                averageLine.setEndX(plotLeft + plotWidth);
+                averageLine.setVisible(true);
+                averageLine.toFront();
+            }
+        });
+    }
+
+    private void highlightSelectedBar() {
+        if (series == null) return;
+
+        for (XYChart.Data<String, Number> data : series.getData()) {
+            Node barNode = data.getNode();
+            if (barNode != null) {
+                // Remove the class from all bars first
+                barNode.getStyleClass().remove("chart-bar-selected");
+
+                // Add the class back only if it matches our selected date
+                LocalDate barDate = (LocalDate) data.getExtraValue();
+                if (barDate != null && barDate.equals(currentlySelectedDate)) {
+                    barNode.getStyleClass().add("chart-bar-selected");
+                }
+            }
         }
     }
 
@@ -158,4 +224,6 @@ public class WeeklyChart extends VBox {
             }
         });
     }
+
+
 }
