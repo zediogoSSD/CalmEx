@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.time.DayOfWeek;
 import java.time.temporal.TemporalAdjusters;
+import javafx.scene.image.Image;
 
 public class MainWindow {
 
@@ -90,6 +91,13 @@ public class MainWindow {
 
         stage.setTitle("CalmEx");
         stage.setScene(scene);
+
+        try {
+            Image applicationIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icon.png")));
+            stage.getIcons().add(applicationIcon);
+        } catch (Exception e) {
+            System.out.println("Não foi possível carregar o ícone: " + e.getMessage());
+        }
 
         loadCSS(false);
 
