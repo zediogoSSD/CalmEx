@@ -5,112 +5,172 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.ptr.IntByReference;
 
+import java.awt.*;
 import java.time.LocalDateTime;
-
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 
 public class MainCode {
-    public static void main(String[] args) throws InterruptedException {
 
-        //array de chars para guardar o texto
-        char[] guardiaoTexto = new char[1024];
-        Atividade atividade = null;
-        //aponta para a janela que está aberta, preciso disto aqui para não haver logo no inicio uma mudança de janela
+    // Variáveis globais para a thread em background aceder
+    private static char[] guardiaoTexto = new char[1024];
+    private static Atividade atividade = null;
+    private static String janelaAtual = "";
+    private static boolean fxIniciado = false;
+    private static ScheduledExecutorService scheduler;
+    private static final int LIMITE_AFK_SEGUNDOS = 900; // 15 minutos
 
+    public static void main(String[] args) {
+        System.out.println("A iniciar o Time Tracker em background...");
+
+        // 1. Ligar BD e fazer limpeza
+        BD.ligarEConfirmarBD();
+        BD.limpezaMensal();
+
+        // 2. Setup Inicial da Janela
         Pointer ptrInicial = kbmInputs.INSTANCE.GetForegroundWindow();
         kbmInputs.INSTANCE.GetWindowTextW(ptrInicial, guardiaoTexto, 1024);
-    
-        // Define a memória inicial JÁ LIMPA
-        String janelaAtual = limparTitulo(Native.toString(guardiaoTexto));
-    
-        System.out.println("Programa Iniciado.");
-        System.out.println("Janela atual: " + janelaAtual);
+        janelaAtual = limparTitulo(Native.toString(guardiaoTexto));
 
-        //confirma e liga (se existir) uma BD
-        BD.ligarEConfirmarBD();
-        //fazer a limpezaMensal
-        BD.limpezaMensal();
-        
-        //relatório diário quando o programa é desligado
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("A encerrar o Time Tracker...");
-            Relatorios.fazerRelatorioDiario();
-            Relatorios.fazerRelatorioSemanal();
-        }));
+        // 3. Criar o ícone na System Tray (Para fechar o programa)
+        setupSystemTray();
 
-        while(true) {
-            Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
-            //descobre o nome de onde está
-            kbmInputs.INSTANCE.GetWindowTextW(windowsPointer, guardiaoTexto, 1024);
-            
-            HWND hwnd = new HWND(windowsPointer);
-            //apanhar o caminho do executável
-            String caminho = getCaminhoEXE(hwnd);
-            System.out.println("Janela: " + Native.toString(guardiaoTexto) + "| Caminho: " + caminho);
+        // 4. Iniciar o Tracker em Background
+        startBackgroundTracker();
+    }
 
-            //AFK finder
-            kbmInputs.LASTINPUTINFO info = new kbmInputs.LASTINPUTINFO();
-            info.cbsize = info.size();
-            kbmInputs.INSTANCE.GetLastInputInfo(info);
-            //output é info.dwtime, dá-nos a última vez que mexemos
+    private static void startBackgroundTracker() {
+        // Cria uma thread a correr em background
+        scheduler = Executors.newSingleThreadScheduledExecutor();
 
-            //passar de tick counter para segundos/minutos (a partir do "detetor" do windows)
-            //atividade atual do sistema
-            int atividadeLigado = kernel32.INSTANCE.GetTickCount();
-            //diferença do atividade parado
-            int timeParadoMili = atividadeLigado - info.dwTime;
+        // Corre este código a cada 1 segundo (substitui o while(true))
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                Pointer windowsPointer = kbmInputs.INSTANCE.GetForegroundWindow();
+                kbmInputs.INSTANCE.GetWindowTextW(windowsPointer, guardiaoTexto, 1024);
+                HWND hwnd = new HWND(windowsPointer);
+                String caminho = getCaminhoEXE(hwnd);
 
-            int timeParadoSegundos = timeParadoMili/1000;
-            if(timeParadoSegundos >= 900) {
-                System.out.println("Estás AFK há: " + timeParadoSegundos + " segundos.");
-            } else {
-                System.out.println("A trabalhar em: " + Native.toString(guardiaoTexto));
-            }
+                // AFK finder
+                kbmInputs.LASTINPUTINFO info = new kbmInputs.LASTINPUTINFO();
+                info.cbsize = info.size();
+                kbmInputs.INSTANCE.GetLastInputInfo(info);
 
-            //Feedback de que janela/app estamos no momento e quando há mudança de janela
-            String janelaAgora = limparTitulo(Native.toString(guardiaoTexto));
-            if(!janelaAgora.equals(janelaAtual)) {
-                System.out.println("---Mudança de Janela Detetada---");
+                int atividadeLigado = kernel32.INSTANCE.GetTickCount();
+                int timeParadoMili = atividadeLigado - info.dwTime;
+                int timeParadoSegundos = timeParadoMili / 1000;
 
-                if(atividade != null) {
-                    //fecha a atividade, ou seja, fecha a janela
-                    atividade.horaFim = LocalDateTime.now();
-                    System.out.println("Esteve na app/página: " + atividade.janelaName + ", durante " + atividade.duracaoSegundos() + " segundos.");
-                    //salva a atividade na BD
-                    BD.salvarAtividade(atividade);
+                // Lógica de Pausa AFK
+                if (timeParadoSegundos >= LIMITE_AFK_SEGUNDOS) {
+                    // Se a atividade ainda está a correr, fecha-a e guarda na BD
+                    if (atividade != null) {
+                        // Subtrai o tempo que esteve parado para não contar esses 15 mins fantasma!
+                        atividade.horaFim = LocalDateTime.now().minusSeconds(timeParadoSegundos);
+
+                        System.out.println("AFK Detetado. Atividade fechada: " + atividade.janelaName);
+                        BD.salvarAtividade(atividade);
+
+                        atividade = null; // Fica nulo para sabermos que estamos AFK
+                        janelaAtual = "AFK";
+                    }
+                } else {
+                    // O utilizador está ativo
+                    String janelaAgora = limparTitulo(Native.toString(guardiaoTexto));
+
+                    // Se voltaste do AFK (atividade é nula), começa uma nova atividade
+                    if (atividade == null) {
+                        System.out.println("Voltou do AFK. A trabalhar em: " + janelaAgora);
+                        atividade = new Atividade(janelaAgora, caminho);
+                        janelaAtual = janelaAgora;
+                    }
+                    // Se mudaste de janela normalmente
+                    else if (!janelaAgora.equals(janelaAtual)) {
+                        atividade.horaFim = LocalDateTime.now();
+                        BD.salvarAtividade(atividade);
+
+                        atividade = new Atividade(janelaAgora, caminho);
+                        janelaAtual = janelaAgora;
+                    }
                 }
-
-                //Muda e começa a contar o tempo na nova janela (aka Atividade)
-                Atividade janelaAtualAtividade = new Atividade(janelaAgora, caminho);
-                atividade = janelaAtualAtividade;
-
-                janelaAtual = janelaAgora;
+            } catch (Exception e) {
+                // Num executável real, os erros são silenciosos sem consola.
+                System.out.println("Erro na thread background: " + e.getMessage());
             }
+        }, 0, 1, TimeUnit.SECONDS);
+    }
 
-            //serve só para ele esperar para mandar outro se não for recebido, para não matar o PC
-            Thread.sleep(1000);
+    private static void setupSystemTray() {
+        if (!SystemTray.isSupported()) {
+            System.out.println("SystemTray não é suportado no teu sistema!");
+            return;
+        }
+
+        SystemTray tray = SystemTray.getSystemTray();
+
+        try {
+            java.net.URL urlIcone = MainCode.class.getResource("/icon.png");
+            Image image = ImageIO.read(urlIcone);
+
+            PopupMenu popup = new PopupMenu();
+
+            MenuItem abrirGuiItem = new MenuItem("Abrir Interface");
+            abrirGuiItem.addActionListener(e -> abrirInterface());
+            popup.add(abrirGuiItem);
+
+            MenuItem exitItem = new MenuItem("Sair do Time Tracker");
+
+            // Quando clicam em "Sair", corre a função de encerramento seguro
+            exitItem.addActionListener(e -> encerramentoSeguro());
+            popup.add(exitItem);
+
+            TrayIcon trayIcon = new TrayIcon(image, "Time Tracker", popup);
+            trayIcon.setImageAutoSize(true);
+            tray.add(trayIcon);
+
+        } catch (Exception e) {
+            System.out.println("Erro ao carregar a imagem: " + e.getMessage());
         }
     }
 
+    private static void encerramentoSeguro() {
+        System.out.println("A encerrar o Time Tracker...");
+
+        // Pára a thread de contagem
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
+
+        // Guarda a última atividade se não estivermos AFK
+        if (atividade != null) {
+            atividade.horaFim = LocalDateTime.now();
+            BD.salvarAtividade(atividade);
+        }
+
+        // Corre os relatórios de fim de dia/semana
+        Relatorios.fazerRelatorioDiario();
+        Relatorios.fazerRelatorioSemanal();
+
+        // Mata o processo
+        System.exit(0);
+    }
+
     public static String getCaminhoEXE(HWND ID) {
-        //sitio onde vamos guardar o PID da app
         IntByReference PID = new IntByReference();
-
-        //ir buscar o ID que vai ser buscado pelo User32 (o nosso kbmInputs (sim, devia mudar o nome))
         kbmInputs.INSTANCE.GetWindowThreadProcessId(ID, PID);
-
-        //já tenho o PID guardado, agr preciso de pedir permissões para tirar as informações
         Pointer processo = kernel32.INSTANCE.OpenProcess(kernel32.PROCESS_QUERY_INFORMATION | kernel32.PROCESS_VM_READ, false, PID.getValue());
 
         if(processo == null) {
             return "";
         }
-        
+
         byte[] buffer = new byte[1024];
         IntByReference tamanho = new IntByReference(buffer.length);
-        //perguntar o caminho, true se correr vem
         if(kernel32.INSTANCE.QueryFullProcessImageNameA(processo, 0, buffer, tamanho)) {
             kernel32.INSTANCE.CloseHandle(processo);
-            //String linda do caminho
             return Native.toString(buffer);
         }
 
@@ -118,15 +178,42 @@ public class MainCode {
         return "";
     }
 
-    //função para limpar o título (para não criar 2 tabelas iguais onde o nome muda uma virgula)
     public static String limparTitulo(String tituloSujo) {
-        
         if (tituloSujo == null || tituloSujo.isEmpty()) {
             return "";
         }
-
         String apenasTextoNormal = tituloSujo.replaceAll("[^\\x20-\\x7E]", "");
-
         return apenasTextoNormal.trim();
+    }
+
+    private static void abrirInterface() {
+        if (!fxIniciado) {
+            fxIniciado = true;
+
+            // Impede que fechar a janela (o "X") mate o background tracker!
+            Platform.setImplicitExit(false);
+
+            // Inicia o motor do JavaFX pela primeira vez
+            Platform.startup(() -> {
+                try {
+                    Stage palco = new Stage();
+                    gui.MainWindow janela = new gui.MainWindow(palco);
+                    janela.show();
+                } catch (Exception ex) {
+                    System.out.println("Erro ao iniciar GUI: " + ex.getMessage());
+                }
+            });
+        } else {
+            // Se o motor JavaFX já está a correr, apenas desenha uma nova janela
+            Platform.runLater(() -> {
+                try {
+                    Stage palco = new Stage();
+                    gui.MainWindow janela = new gui.MainWindow(palco);
+                    janela.show();
+                } catch (Exception ex) {
+                    System.out.println("Erro ao reabrir GUI: " + ex.getMessage());
+                }
+            });
+        }
     }
 }

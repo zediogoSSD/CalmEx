@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.time.DayOfWeek;
 import java.time.temporal.TemporalAdjusters;
 import javafx.scene.image.Image;
+import javax.imageio.ImageIO;
 
 public class MainWindow {
 
@@ -93,10 +94,20 @@ public class MainWindow {
         stage.setScene(scene);
 
         try {
-            Image applicationIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icon.png")));
-            stage.getIcons().add(applicationIcon);
+            Image appIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/icon.png")));
+            stage.getIcons().add(appIcon);
+
+            java.net.URL iconURL = getClass().getResource("/icon.png");
+            if (iconURL != null) {
+                java.awt.Image awtIcon = java.awt.Toolkit.getDefaultToolkit().getImage(iconURL);
+                if (java.awt.Taskbar.isTaskbarSupported() && java.awt.Taskbar.getTaskbar().isSupported(java.awt.Taskbar.Feature.ICON_IMAGE)) {
+                    java.awt.Taskbar.getTaskbar().setIconImage(awtIcon);
+                }
+            }
+        } catch (UnsupportedOperationException e) {
+            System.out.println("O Windows bloqueou a mudança da Taskbar (comum no IntelliJ).");
         } catch (Exception e) {
-            System.out.println("Não foi possível carregar o ícone: " + e.getMessage());
+            System.out.println("Não foi possível carregar o ícone da Taskbar: " + e.getMessage());
         }
 
         loadCSS(false);

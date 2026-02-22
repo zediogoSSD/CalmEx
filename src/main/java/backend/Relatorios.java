@@ -27,7 +27,7 @@ public class Relatorios {
         //sql que seleciona o nome da janela e soma toda a sua duração, só do próprio dia, e agrupa por nome e ordena por tempo
         String sql = "SELECT NomeJanela, SUM(duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) = date('now') " + "GROUP BY Nomejanela " + "ORDER BY TempoTotal DESC";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+        try (Connection conn = DriverManager.getConnection(BD.URL_BD);
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()){
             
@@ -81,7 +81,7 @@ public class Relatorios {
         //sql que seleciona o nome da janela e soma toda a sua duração, só do próprio dia, e agrupa por nome e ordena por tempo
         String sql = "SELECT NomeJanela, SUM(duracao) as TempoTotal " + "FROM atividades " + "WHERE date(DataInicio) >= date('now', '-7 days') " + "GROUP BY Nomejanela " + "ORDER BY TempoTotal DESC";
 
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+        try (Connection conn = DriverManager.getConnection(BD.URL_BD);
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()){
             
@@ -151,7 +151,7 @@ public class Relatorios {
 
         Map<String, Integer> mapaTempo = new HashMap<>();
 
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+        try (Connection conn = DriverManager.getConnection(BD.URL_BD);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, dataInicio);
@@ -199,7 +199,7 @@ public class Relatorios {
             String sql = "SELECT NomeJanela, SUM(Duracao) as TempoTotal, MAX(CaminhoExecutavel) as Caminho " + "FROM atividades " + "WHERE date(DataInicio) BETWEEN ? AND ? " + "AND Duracao < ? " + "GROUP BY NomeJanela";
             Map<String, DadosApp> mapaAgrupado = new HashMap<>();
 
-            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+            try (Connection conn = DriverManager.getConnection(BD.URL_BD);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
                 stmt.setString(1, dataInicio);
@@ -273,7 +273,7 @@ public class Relatorios {
                      "WHERE date(DataInicio) = ? " +
                      "ORDER BY DataInicio DESC";
 
-            try (Connection conn = DriverManager.getConnection("jdbc:sqlite:meu_tempo.db");
+            try (Connection conn = DriverManager.getConnection(BD.URL_BD);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
                 // Injeta a data que pedimos (ex: "2023-10-27")
