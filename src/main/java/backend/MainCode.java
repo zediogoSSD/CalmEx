@@ -39,6 +39,8 @@ public class MainCode {
         // 3. Criar o ícone na System Tray (Para fechar o programa)
         setupSystemTray();
 
+        configurarArranqueAutomatico();
+
         // 4. Iniciar o Tracker em Background
         startBackgroundTracker();
     }
@@ -214,6 +216,24 @@ public class MainCode {
                     System.out.println("Erro ao reabrir GUI: " + ex.getMessage());
                 }
             });
+        }
+    }
+
+    private static void configurarArranqueAutomatico() {
+        try {
+            // Descobre a pasta exata onde o teu amigo guardou o programa
+            String caminhoAtual = System.getProperty("user.dir");
+            String caminhoExe = caminhoAtual + "\\TimeTracker.exe"; // Tem de ser o nome exato do teu .exe final!
+
+            // Comando do Windows para adicionar o programa ao Registo de Arranque (Startup Registry)
+            // O comando 'reg add' faz isto silenciosamente em background
+            String comando = "reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v \"TimeTracker\" /t REG_SZ /d \"\\\"" + caminhoExe + "\\\"\" /f";
+
+            // Executa o comando
+            Runtime.getRuntime().exec(comando);
+            System.out.println("Arranque automático atualizado para: " + caminhoExe);
+        } catch (Exception e) {
+            System.out.println("Erro ao definir arranque automático: " + e.getMessage());
         }
     }
 }
