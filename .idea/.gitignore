@@ -9,3 +9,9 @@
 # Editor-based HTTP Client requests
 /httpRequests/
 TimeTracker/runtime/
+
+# Ignorar ficheiros pesados e executáveis
+*.zip
+*.exe
+**/runtime/
+target/
