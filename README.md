@@ -12,7 +12,8 @@ By helping you track your sessions, CalmEx makes it easier to define your object
 
 ## ScreenShots
 
-![Calmex screenshots](https://github.com/user-attachments/assets/387eb790-e94d-4e8d-ad47-6585b1f81796)
-![Calmex screenshots](https://github.com/user-attachments/assets/6f9e59a0-50e0-4f57-b0e6-cf53790e8a9f)
-![Calmex screenshots](![Calmex screenshots historico dark mode](https://github.com/user-attachments/assets/26787648-6aa9-4705-a0f4-84b3d3242131)
-https://github.com/user-attachments/assets/59f86013-d0ea-4b9b-b15a-f9d556f48f7f)
+
+![Calmex screenshots](https://github.com/user-attachments/assets/bffaf6be-51e6-4828-a7ef-25e2d3590dac)
+![Calmex screenshots dark mode](https://github.com/user-attachments/assets/40f91793-9542-4892-8c5d-ef0c916d20a5)
+![Calmex screenshots historico](https://github.com/user-attachments/assets/d0c69f7d-9988-4c86-adc0-0a4009351097)
+![Calmex screenshots historico dark mode](https://github.com/user-attachments/assets/630b15bd-5e87-4f90-bf0a-844332ac1d9a)
