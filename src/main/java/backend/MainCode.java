@@ -23,6 +23,7 @@ public class MainCode {
     private static boolean fxIniciado = false;
     private static ScheduledExecutorService scheduler;
     private static final int LIMITE_AFK_SEGUNDOS = 900; // 15 minutos
+    private static boolean emEncerramento = false;
 
     public static void main(String[] args) {
         System.out.println("A iniciar o Time Tracker em background...");
@@ -41,13 +42,19 @@ public class MainCode {
 
         configurarArranqueAutomatico();
 
+        configurarShutdownHook();
+
         // 4. Iniciar o Tracker em Background
         startBackgroundTracker();
     }
 
     private static void startBackgroundTracker() {
         // Cria uma thread a correr em background
-        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable);
+            thread.setDaemon(true); // <-- This is the magic line
+            return thread;
+        });
 
         // Corre este código a cada 1 segundo (substitui o while(true))
         scheduler.scheduleAtFixedRate(() -> {
@@ -139,24 +146,22 @@ public class MainCode {
     }
 
     private static void encerramentoSeguro() {
+        // Prevent double-firing if the shutdown hook is also running
+        if (emEncerramento) return;
+        emEncerramento = true;
+
         System.out.println("A encerrar o Time Tracker...");
 
-        // Pára a thread de contagem
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
+        if (scheduler != null) scheduler.shutdown();
 
-        // Guarda a última atividade se não estivermos AFK
         if (atividade != null) {
-            atividade.horaFim = LocalDateTime.now();
+            atividade.horaFim = java.time.LocalDateTime.now();
             BD.salvarAtividade(atividade);
         }
 
-        // Corre os relatórios de fim de dia/semana
         Relatorios.fazerRelatorioDiario();
         Relatorios.fazerRelatorioSemanal();
 
-        // Mata o processo
         System.exit(0);
     }
 
@@ -221,19 +226,51 @@ public class MainCode {
 
     private static void configurarArranqueAutomatico() {
         try {
-            // Descobre a pasta exata onde o teu amigo guardou o programa
-            String caminhoAtual = System.getProperty("user.dir");
-            String caminhoExe = caminhoAtual + "\\TimeTracker.exe"; // Tem de ser o nome exato do teu .exe final!
+            String pastaAtual = System.getProperty("user.dir");
 
-            // Comando do Windows para adicionar o programa ao Registo de Arranque (Startup Registry)
-            // O comando 'reg add' faz isto silenciosamente em background
-            String comando = "reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v \"TimeTracker\" /t REG_SZ /d \"\\\"" + caminhoExe + "\\\"\" /f";
+            // O ESCUDO DO SYSTEM32:
+            // Se a pasta atual contém "system32", fomos iniciados pelo arranque do Windows.
+            // Ignoramos a configuração para não estragar o Registo!
+            if (pastaAtual.toLowerCase().contains("system32")) {
+                System.out.println("Iniciado pelo arranque do Windows. Registo protegido.");
+                return;
+            }
 
-            // Executa o comando
+            // Se não estamos no System32, o utilizador abriu a app manualmente.
+            // Vamos gravar o caminho correto no Registo do Windows.
+            String caminhoExe = pastaAtual + "\\TimeTracker.exe";
+
+            // Comando com aspas escapadas (\\\") para proteger contra espaços nos nomes das pastas
+            String comando = "reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\" /v \"TimeTracker\" /t REG_SZ /d \"\\\"" + caminhoExe + "\\\"\" /f";
+
             Runtime.getRuntime().exec(comando);
             System.out.println("Arranque automático atualizado para: " + caminhoExe);
+
         } catch (Exception e) {
             System.out.println("Erro ao definir arranque automático: " + e.getMessage());
         }
+    }
+
+    private static void configurarShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            // If we already closed manually via the System Tray, do nothing
+            if (emEncerramento) return;
+            emEncerramento = true;
+
+            System.out.println("Windows is shutting down. Saving Time Tracker data...");
+
+            if (scheduler != null) {
+                scheduler.shutdownNow();
+            }
+
+            // Save the last activity before the PC dies
+            if (atividade != null) {
+                atividade.horaFim = java.time.LocalDateTime.now();
+                BD.salvarAtividade(atividade);
+            }
+
+            Relatorios.fazerRelatorioDiario();
+            Relatorios.fazerRelatorioSemanal();
+        }));
     }
 }
